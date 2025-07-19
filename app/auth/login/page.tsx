@@ -15,11 +15,12 @@ import useSWRMutation from "swr/mutation";
 import axios, {AxiosError} from "axios";
 import {LoginFormData, LoginFormSchema} from "@/lib/types/authTypes";
 import {BsGoogle} from "react-icons/bs";
+import {useRouter} from "next/navigation";
 
 
 async function loginFetcher(_url: string, {arg}: { arg: LoginFormData }) {
     try {
-        const response = await axios.post("/api/login", arg);
+        const response = await axios.post("/api/auth/login", arg);
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError && error.response) {
@@ -31,7 +32,7 @@ async function loginFetcher(_url: string, {arg}: { arg: LoginFormData }) {
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
-
+    const router = useRouter()
     const form = useForm<LoginFormData>({
         resolver: zodResolver(LoginFormSchema),
         defaultValues: {
@@ -47,6 +48,7 @@ export default function LoginPage() {
             await trigger(data);
             console.log("Login successful");
             form.reset();
+            router.push('/')
         } catch (err) {
             console.error("Login error:", err);
         }

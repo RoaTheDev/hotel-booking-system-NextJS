@@ -1,11 +1,12 @@
 import {NextRequest, NextResponse} from "next/server";
-import {ServerSignupFromData} from "@/lib/types/authTypes";
+import {ServerSignupFromData, ServerSignupSchema, SignupResponse} from "@/lib/types/authTypes";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
 import {generateToken, hashPassword} from "@/lib/jwt";
-import {ServerSignupSchema} from "@/lib/types/authTypes";
 import {ValidationError} from "@/lib/types/error";
 import {ZodError} from "zod";
+import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {validationErrorFormat} from "@/lib/zodErrorFormat";
 
 export const POST = async (req: NextRequest) => {
 
@@ -17,11 +18,13 @@ export const POST = async (req: NextRequest) => {
             where: {email: validatedData.email},
         })
         if (existingUser) {
-            return NextResponse.json({
-                    message: "User already exists",
-                }
-                ,
-                {status: HttpStatusCode.Conflict})
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                errors: {type: "Conflict"},
+                data: null,
+                success: false,
+                message: "User already exists"
+            }, {status: HttpStatusCode.Conflict})
+
         }
 
         const passwordHashed = await hashPassword(body.password)
@@ -45,10 +48,13 @@ export const POST = async (req: NextRequest) => {
             userId: user.id,
             role: user.role
         })
-        return NextResponse.json({
+        return NextResponse.json<ApiResponse<SignupResponse>>({
             message: "user signed successfully",
-            user,
-            token
+            data: {
+                user: user,
+                token
+            },
+            success: true
         }, {status: HttpStatusCode.Created})
 
 
@@ -56,15 +62,23 @@ export const POST = async (req: NextRequest) => {
         if (error instanceof ValidationError) {
         }
         if (error instanceof ZodError) {
-            return NextResponse.json(
-                {error: 'Invalid input data', details: error.errors},
-                {status: 400}
-            );
-        }
-        return NextResponse.json(
-            {error: 'Internal server error'},
-            {status: 500}
-        );
-    }
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                message: "Invalid input data"
+                , errors: validationErrorFormat(error),
+                data: null,
+                success: false
+            }, {status: HttpStatusCode.BadRequest})
 
+        }
+        return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+            message: 'Internal server error',
+            data: null,
+            success: false,
+            errors: {
+                type: "ServerError"
+            }
+        }, {status: HttpStatusCode.InternalServerError})
+
+
+    }
 }

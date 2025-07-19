@@ -51,3 +51,38 @@ export type AppJwtPayload = {
     iat?: number,
     exp?: number,
 }
+export type ForgetPassword = {
+    email: string
+}
+
+export type ResetPassword = {
+    otp: string,
+    newPassword: string
+}
+
+
+export type UserType = {
+    id: number,
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string,
+}
+
+export type LoginResponse = {
+    message: string
+    data: {
+        token: string,
+        user: UserType
+    }
+}
+
+
+export type SignupResponse = {
+    user: {id: number, email : string,role: string},
+    token: string
+}
+
+export type ForgetPasswordResponse = {
+    sessionId: string
+}

@@ -39,8 +39,19 @@ model User {
 
   // Relations
   bookings Booking[]
+  otp      OTP[]
 
   @@map("users")
+}
+
+model OTP {
+  id        Int    @id @default(autoincrement())
+  otpCode   String @unique @db.VarChar(6)
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id])
+  sessionId String @db.VarChar(50)
+
+  @@index([otpCode])
 }
 
 model Amenity {

@@ -1,9 +1,11 @@
 import {NextRequest, NextResponse} from "next/server";
-import {LoginFormData, LoginFormSchema} from "@/lib/types/authTypes";
+import {LoginFormData, LoginFormSchema, LoginResponse} from "@/lib/types/authTypes";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {generateToken, verifyPassword} from "@/lib/jwt";
 import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
+import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {validationErrorFormat} from "@/lib/zodErrorFormat";
 
 export const POST = async (req: NextRequest) => {
     try {
@@ -23,23 +25,29 @@ export const POST = async (req: NextRequest) => {
         })
 
         if (!userData) {
-            return NextResponse.json({
-                message: "user does not exist",
-            }, {status: HttpStatusCode.NotFound})
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                    success: false,
+                    errors: {
+                        type: "NotFound",
+                    },
+                    message: "user does not exist",
+                    data: null
+                }
+                , {status: HttpStatusCode.NotFound})
         }
 
         const {passwordHash, ...user} = userData
         const isValidPassword = await verifyPassword(validatedData.password, passwordHash)
 
         if (!isValidPassword) {
-            return NextResponse.json({
-                    message: "Invalid credentials",
-                },
-                {status: HttpStatusCode.Unauthorized})
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                data: null,
+                success: false,
+                message: "invalid credential"
+            }, {status: HttpStatusCode.Unauthorized})
         }
         const token = generateToken({userId: user.id, role: user.role, email: user.email})
-
-        const response = NextResponse.json({
+        const response = NextResponse.json<LoginResponse>({
             message: "Login successfully",
             data: {token, user},
         })
@@ -55,14 +63,20 @@ export const POST = async (req: NextRequest) => {
 
     } catch (err) {
         if (err instanceof ZodError) {
-            return NextResponse.json({
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                success: false,
                 message: "Invalid input",
-                details: err.errors
+                data: null,
+                errors: validationErrorFormat(err),
             }, {status: HttpStatusCode.BadRequest})
         }
-        return NextResponse.json(
-            {error: 'Internal server error'},
-            {status: 500}
-        );
+        return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+            errors: {
+                type: "ServerError"
+            },
+            data: null,
+            success: false,
+            message: "error from server"
+        }, {status: HttpStatusCode.InternalServerError})
     }
 }

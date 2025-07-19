@@ -15,7 +15,7 @@ export const GET = async (request: NextRequest) => {
         }
         const payload = verifyToken(token)
 
-        const user = prismaClient.user.findUnique({
+        const user = await prismaClient.user.findUnique({
             where: {id: payload.userId},
             select: {
                 id: true,
