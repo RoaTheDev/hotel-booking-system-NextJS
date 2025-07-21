@@ -349,12 +349,16 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        <div className="feature-card text-center group cursor-pointer">
+                        <div className="feature-card text-center group ">
+
+                        <Link href={"/garden"}>
                             <div
-                                className="feature-icon w-20 h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20 group-hover:border-amber-400/50 transition-all duration-300">
+                                className="cursor-pointer feature-icon w-20 h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20 group-hover:border-amber-400/50 transition-all duration-300">
                                 <div
                                     className="w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full"></div>
                             </div>
+                        </Link>
+
                             <div className="feature-content">
                                 <h3 className="text-xl font-light text-slate-100 mb-4 tracking-wide">Zen Gardens</h3>
                                 <p className="text-sm text-amber-400 tracking-widest mb-3">TEIEN</p>
