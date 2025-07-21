@@ -12,13 +12,19 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, EyeOff } from "lucide-react"
 import {SignupFormData,SignupFormSchema} from "@/lib/types/authTypes";
+import {useSignup} from "@/lib/query/authHooks";
+import {toast} from "sonner";
+import {useRouter} from "next/navigation";
+import {Modal} from "@/components/Modal";
 
 export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
-
+    const [modalOpen, setModalOpen] = useState(false);
+    const signup = useSignup()
+    const router = useRouter()
     const {
         register,
         handleSubmit,
@@ -107,16 +113,23 @@ export default function SignupPage() {
         return () => ctx.revert()
     }, [])
 
+    const openModal = () => {
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+    };
     const onSubmit = async (data: SignupFormData) => {
         setIsLoading(true)
 
-        // Loading animation
+
         gsap.to(".submit-btn", { scale: 0.95, duration: 0.1 })
 
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            console.log("Signup data:", data)
+            await signup.mutateAsync(data);
 
+            toast.success("Signup successfully")
             // Success animation
             gsap.to(".form-content", {
                 scale: 1.05,
@@ -125,10 +138,9 @@ export default function SignupPage() {
                 repeat: 1,
                 ease: "power2.inOut",
             })
-        } catch (error) {
-            console.error("Signup failed:", error)
 
-            // Error shake animation
+            router.push("/login")
+        } catch  {
             gsap.to(".form-content", {
                 keyframes: [
                     { x: -10, duration: 0.1 },
@@ -139,6 +151,7 @@ export default function SignupPage() {
                 ],
                 ease: "power2.inOut",
             })
+            openModal()
         } finally {
             setIsLoading(false)
             gsap.to(".submit-btn", { scale: 1, duration: 0.2 })
@@ -146,6 +159,12 @@ export default function SignupPage() {
     }
 
     return (
+        <>
+            {signup.isError && (
+                <Modal isOpen={modalOpen} onClose={closeModal} title={signup.error.name}>
+                    <p>{signup.error.message}</p>
+                </Modal>
+            )}
         <div
             ref={containerRef}
             className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden"
@@ -166,17 +185,10 @@ export default function SignupPage() {
                         fill
                         className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
-                    <div className=" flex flex-col   text-center text-slate-100">
-                        <h2 className="text-2xl font-light mb-2">Begin Your Journey</h2>
-                        <p className="text-slate-300">Create your account and discover tranquility</p>
-                    </div>
-                </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-10" />
 
-                {/* Right side - Form */}
-                <div className="w-full max-w-md mx-auto">
-                    <div className="form-content text-center mb-8">
-                        <Link href="/" className="inline-flex items-center space-x-3 mb-6">
+                    <div className="absolute top-6 left-6 z-20">
+                        <Link href="/" className="inline-flex items-center space-x-3">
                             <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-sm flex items-center justify-center shadow-lg">
                                 <div className="w-6 h-6 border-2 border-slate-100 rounded-full"></div>
                             </div>
@@ -185,6 +197,17 @@ export default function SignupPage() {
                                 <span className="text-xs text-slate-400 tracking-widest">MOUNTAIN RETREAT</span>
                             </div>
                         </Link>
+                    </div>
+                    <div className=" flex flex-col  absolute bottom-8 left-28  text-center text-slate-100">
+                        <h2 className="text-2xl font-light mb-2">Begin Your Journey</h2>
+                        <p className="text-slate-300">Create your account and discover tranquility</p>
+                    </div>
+                </div>
+
+                {/* Right side - Form */}
+                <div className="w-full max-w-md mx-auto">
+                    <div className="form-content text-center mb-8">
+
                         <h1 className="text-3xl font-light text-slate-100 mb-2">Create Account</h1>
                         <p className="text-slate-400">Join us and start your journey to inner peace</p>
                     </div>
@@ -314,5 +337,7 @@ export default function SignupPage() {
                 </div>
             </div>
         </div>
+        </>
+
     )
 }
