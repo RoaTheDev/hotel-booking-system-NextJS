@@ -34,6 +34,7 @@ model User {
   lastName     String   @map("last_name") @db.VarChar(100)
   phone        String?  @db.VarChar(20)
   role         Role     @default(GUEST)
+  isDeleted    Boolean  @default(false) @map("is_deleted")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -45,21 +46,28 @@ model User {
 }
 
 model OTP {
-  id        Int    @id @default(autoincrement())
-  otpCode   String @unique @db.VarChar(6)
+  id        Int      @id @default(autoincrement())
+  otpCode   String   @unique @db.VarChar(6)
   userId    Int
-  user      User   @relation(fields: [userId], references: [id])
-  sessionId String @db.VarChar(50)
+  sessionId String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
 
   @@index([otpCode])
 }
 
 model Amenity {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique @db.VarChar(100)
-  icon        String? @db.VarChar(255)
-  description String? @db.VarChar(255)
-  isActive    Boolean @default(true) @map("is_active")
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  icon        String?  @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  isActive    Boolean  @default(true) @map("is_active")
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
   rooms RoomAmenity[]
@@ -68,14 +76,18 @@ model Amenity {
 }
 
 model RoomType {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique @db.VarChar(100)
-  description String? @db.VarChar(255)
-  basePrice   Decimal @map("base_price") @db.Decimal(10, 2)
-  maxGuests   Int     @map("max_guests")
-  imageUrl    String? @map("image_url") @db.VarChar(255)
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  basePrice   Decimal  @map("base_price") @db.Decimal(10, 2)
+  maxGuests   Int      @map("max_guests")
+  imageUrl    String?  @map("image_url") @db.VarChar(255)
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
   // Relations
-  rooms       Room[]
+  rooms Room[]
 
   @@map("room_types")
 }
@@ -86,7 +98,9 @@ model Room {
   roomTypeId Int      @map("room_type_id")
   floor      Int?
   isActive   Boolean  @default(true) @map("is_active")
+  isDeleted  Boolean  @default(false) @map("is_deleted")
   createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
   roomType     RoomType           @relation(fields: [roomTypeId], references: [id])
@@ -112,9 +126,11 @@ model RoomImage {
 }
 
 model RoomAmenity {
-  id        Int @id @default(autoincrement())
-  roomId    Int @map("room_id")
-  amenityId Int @map("amenity_id")
+  id        Int      @id @default(autoincrement())
+  roomId    Int      @map("room_id")
+  amenityId Int      @map("amenity_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   room    Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -130,6 +146,8 @@ model Booking {
   roomId                Int           @map("room_id")
   checkIn               DateTime      @map("check_in") @db.Date
   checkOut              DateTime      @map("check_out") @db.Date
+  checkInTime           DateTime?     @map("check_in_time")
+  checkOutTime          DateTime?     @map("check_out_time")
   guests                Int           @default(1)
   totalAmount           Decimal       @map("total_amount") @db.Decimal(10, 2)
   stripePaymentIntentId String?       @map("stripe_payment_intent_id")
@@ -139,9 +157,11 @@ model Booking {
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
   // Relations
-  user User @relation(fields: [userId], references: [id])
-  room Room @relation(fields: [roomId], references: [id])
+  user User               @relation(fields: [userId], references: [id])
+  room Room               @relation(fields: [roomId], references: [id])
+  logs BookingStatusLog[]
 
+  @@index([checkIn, checkOut])
   @@map("bookings")
 }
 
@@ -151,9 +171,22 @@ model RoomAvailability {
   date        DateTime @db.Date
   isAvailable Boolean  @default(true) @map("is_available")
   reason      String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, date])
   @@map("room_availability")
+}
+
+model BookingStatusLog {
+  id        Int           @id @default(autoincrement())
+  bookingId Int           @map("booking_id")
+  status    BookingStatus
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@map("booking_status_logs")
 }

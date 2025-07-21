@@ -1,130 +1,208 @@
+
 @import "tailwindcss";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
-
-:root {
-  --kronii-primary: #3b82f6;
-  --kronii-accent: #f59e0b;
-  --kronii-secondary: #e5e7eb;
-  --kronii-background: #ffffff;
-  --kronii-surface: #f9fafb;
-  --kronii-text: #1f2937;
-  --kronii-text-light: #6b7280;
-  --kronii-border: #d1d5db;
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
+@import 'tw-animate-css';
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  :root {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
+    --primary: 245 158 11;
+    --primary-foreground: 15 23 42;
+    --secondary: 51 65 85;
+    --secondary-foreground: 248 250 252;
+    --muted: 51 65 85;
+    --muted-foreground: 148 163 184;
+    --accent: 51 65 85;
+    --accent-foreground: 248 250 252;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+    --border: 51 65 85;
+    --input: 51 65 85;
+    --ring: 245 158 11;
+    --radius: 0.5rem;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+/*@layer base {*/
+/*  * {*/
+/*    @apply border border-border;*/
+/*  }*/
+/*  body {*/
+/*    @apply bg-background text-foreground;*/
+/*    font-feature-settings: "rlig" 1, "calt" 1;*/
+/*  }*/
+/*}*/
+
+
+/* Dark theme typography */
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  letter-spacing: 0.025em;
+  background: rgb(15, 23, 42);
+  color: rgb(248, 250, 252);
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(30, 41, 59);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(100, 116, 139);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(148, 163, 184);
+}
+
+/* Smooth transitions and animations */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for dark theme */
+.focus-visible:focus-visible {
+  @apply outline-none ring-2 ring-amber-400/50 ring-offset-2 ring-offset-slate-900;
+}
+
+/* Selection colors for dark theme */
+::selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: rgb(248, 250, 252);
+}
+
+::-moz-selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: rgb(248, 250, 252);
+}
+
+/* GSAP Animation Classes */
+.gsap-fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.gsap-scale-in {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.gsap-slide-left {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.gsap-slide-right {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+/* Dark theme specific animations */
+@keyframes darkFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes darkFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes darkGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+  }
+}
+
+@keyframes darkPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Utility classes for dark theme */
+.dark-fade-in {
+  animation: darkFadeIn 0.8s ease-out;
+}
+
+.dark-float {
+  animation: darkFloat 3s ease-in-out infinite;
+}
+
+.dark-glow {
+  animation: darkGlow 2s ease-in-out infinite;
+}
+
+.dark-pulse {
+  animation: darkPulse 2s ease-in-out infinite;
+}
+
+/* Dark theme button styles */
+.btn-dark {
+  background: linear-gradient(135deg, rgb(245, 158, 11), rgb(251, 146, 60));
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.btn-dark:hover {
+  background: linear-gradient(135deg, rgb(217, 119, 6), rgb(234, 88, 12));
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Dark theme card styles */
+.card-dark {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-dark:hover {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(245, 158, 11, 0.3);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark theme form inputs */
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  border-color: rgb(245, 158, 11);
+}
+
+/* Dark theme loading states */
+.loading-dark {
+  animation: darkPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

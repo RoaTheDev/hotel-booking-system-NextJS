@@ -30,7 +30,8 @@ export const POST = async (request: NextRequest) => {
         data: {
             otpCode: OTP,
             userId: user.id,
-            sessionId
+            sessionId,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000)
         }
     })
 

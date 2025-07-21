@@ -25,9 +25,7 @@ const BaseSignupFormSchema = z.object({
         .regex(/[0-9]/, "Password must contain at least one number")
         .max(50, "Password must not exceed 50 characters long"),
     confirmPassword: z.string(),
-    terms: z.boolean().refine((val) => val, {
-        message: "You must agree to the Terms of Service and Privacy Policy",
-    }),
+
 });
 
 export const SignupFormSchema = BaseSignupFormSchema.refine(
@@ -39,7 +37,6 @@ export const SignupFormSchema = BaseSignupFormSchema.refine(
 
 export const ServerSignupSchema = BaseSignupFormSchema.omit({
     confirmPassword: true,
-    terms: true,
 })
 export type SignupFormData = z.infer<typeof SignupFormSchema>;
 
