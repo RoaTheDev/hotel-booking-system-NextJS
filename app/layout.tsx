@@ -3,8 +3,7 @@ import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import "./globals.css";
 import {Providers} from "@/app/providers";
-import { Toaster } from "sonner";
-import {Navbar} from "@/components/Navbar";
+import {LayoutNavWrapper} from "@/components/LayoutNavWrapper";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -27,17 +26,14 @@ export const metadata: Metadata = {
         "A serene hotel chain dedicated to providing guests a peaceful escape from the chaos of everyday life.",
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({children}: { children: React.ReactNode }) {
     return (
         <html lang="en" className={inter.variable}>
         <body className={inter.className}>
         <Providers>
-            <Navbar/>
+            <LayoutNavWrapper>
             {children}
+            </LayoutNavWrapper>
         </Providers>
         </body>
         </html>

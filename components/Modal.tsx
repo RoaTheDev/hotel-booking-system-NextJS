@@ -22,7 +22,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             gsap.fromTo(
                 backdropRef.current,
                 { opacity: 0 },
-                { opacity: 0.7, duration: 0.4, ease: "power3.out" }
+                { opacity: 0.85, duration: 0.4, ease: "power3.out" }
             );
         }
     }, [isOpen]);
@@ -38,8 +38,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <div
                 ref={modalRef}
                 className="bg-slate-800 rounded-lg p-6 max-w-md w-full shadow-lg border border-slate-700"
-                onClick={(e) => e.stopPropagation()}
-            >
+                onClick={(e) => e.stopPropagation()}>
                 {title && (
                     <h2 className="text-xl font-semibold text-slate-100 mb-4">{title}</h2>
                 )}
