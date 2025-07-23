@@ -47,9 +47,9 @@ export function Navbar() {
     }
 
     return (
-        <nav className="fixed top-0 w-full bg-slate-900/80 backdrop-blur-xl z-50 border-b border-slate-700/50">
+        <nav className="fixed top-0 w-full  bg-slate-900/80 backdrop-blur-xl z-50 border-b border-slate-700/50">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16 sm:h-20">
+                <div className="flex justify-between  items-center h-16 sm:h-20">
                     {/* Logo */}
                     <Link href={'/'} className="flex-shrink-0">
                         <div className="flex items-center">

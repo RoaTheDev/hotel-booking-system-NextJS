@@ -27,21 +27,22 @@ export const useAuthStore = create<AuthStore>()(
         (set, get) => ({
             user: null,
             token: null,
-
-            get isAuthenticated() {
-                return !!get().token && !!get().user;
-            },
+            isAuthenticated:false,
+            // get isAuthenticated() {
+            //     return !!get().token && !!get().user;
+            // },
+            //
 
             login: async (email, password) => {
-                // No need to set loading or error here, handled by React Query
                 try {
                     const { data } = await loginApi(email, password);
                     set({
                         user: data.data.user,
                         token: data.data.token,
+                        isAuthenticated :!!get().token && !!get().user
                     });
+
                 } catch (error) {
-                    // Let React Query catch and handle errors
                     throw error;
                 }
             },
@@ -52,6 +53,7 @@ export const useAuthStore = create<AuthStore>()(
                     set({
                         user: data.user,
                         token: data.token,
+                        isAuthenticated :!!get().token && !!get().user
                     });
                 } catch (error) {
                     throw error;
@@ -64,6 +66,7 @@ export const useAuthStore = create<AuthStore>()(
                     set({
                         user: null,
                         token: null,
+                        isAuthenticated :!!get().token && !!get().user
                     });
                 } catch (error) {
                     throw error;

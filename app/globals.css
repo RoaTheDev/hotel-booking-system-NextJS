@@ -206,3 +206,20 @@ select:focus {
 .loading-dark {
   animation: darkPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+@keyframes progress {
+  0% {
+    width: 0;
+    opacity: 1;
+  }
+  50% {
+    width: 80%;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+.animate-progress {
+  animation: progress 600ms ease-in-out forwards;
+}
