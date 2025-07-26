@@ -1,5 +1,3 @@
-// app/providers.tsx (or in some shared folder)
-
 "use client";
 
 import React from "react";

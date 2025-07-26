@@ -64,22 +64,32 @@ export type UserType = {
     firstName: string,
     lastName: string,
     role: string,
+    phone: string | null,
+
 }
 
+
+
 export type LoginResponse = {
-    message: string
-    data: {
         token: string,
         user: UserType
-    }
 }
 
 
 export type SignupResponse = {
-    user: {id: number, email : string,role: string},
+    user: UserType,
     token: string
 }
 
 export type ForgetPasswordResponse = {
     sessionId: string
 }
+
+export const profileSchema = z.object({
+    firstName: z.string().min(2, "First name must be at least 2 characters").max(50, "First name must not exceed 50 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters").max(50, "Last name must not exceed 50 characters"),
+    email: z.string().email("Must be a valid email address").max(255, "Email must not exceed 255 characters"),
+    phone: z.string().max(20, "Phone number must not exceed 20 characters").optional().nullable(),
+})
+
+export type ProfileForm = z.infer<typeof profileSchema>

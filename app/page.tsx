@@ -81,7 +81,6 @@ export default function HomePage() {
                 },
             )
 
-            // Features animation with stagger
             gsap.fromTo(
                 ".feature-card",
                 {opacity: 0, y: 60, rotateX: 15},
@@ -99,7 +98,6 @@ export default function HomePage() {
                 },
             )
 
-            // Feature card hover animations
             gsap.utils.toArray(".feature-card").forEach((card) => {
                 if (!(card instanceof HTMLElement)) return;
 
@@ -119,7 +117,6 @@ export default function HomePage() {
                 });
             });
 
-            // Rooms animation with 3D effect
             gsap.fromTo(
                 ".room-card",
                 {opacity: 0, scale: 0.8, rotateY: 15},

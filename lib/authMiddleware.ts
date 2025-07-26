@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from "next/server";
-import {getTokenFromReq} from "@/lib/jwt";
+import {getTokenFromCookie} from "@/lib/jwt";
 import {HttpStatusCode} from "axios";
 
 export const authMiddleware = (request: NextRequest) => {
-    const token = getTokenFromReq(request);
+    const token = getTokenFromCookie(request);
     if (!token) {
         return NextResponse.json(
             {error: "Authentication token required"},

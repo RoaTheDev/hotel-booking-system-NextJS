@@ -5,6 +5,7 @@ import "./globals.css";
 import {Providers} from "@/app/providers";
 import {LayoutNavWrapper} from "@/components/LayoutNavWrapper";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
+import AuthValidator from "@/components/AuthValidator";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({children}: { children: React.ReactNode }) {
         <body className={inter.className}>
         <NavigationProgressBar/>
         <Providers>
+            <AuthValidator />
             <LayoutNavWrapper>
             {children}
             </LayoutNavWrapper>

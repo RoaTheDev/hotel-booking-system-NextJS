@@ -1,6 +1,7 @@
-import { useMutation } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/stores/AuthStore";
-import { ServerSignupFromData } from "@/lib/types/authTypes";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {useAuthStore} from "@/lib/stores/AuthStore";
+import {ServerSignupFromData} from "@/lib/types/authTypes";
+import {fetchUserProfile} from "@/lib/data/authApi";
 
 export const useLogin = () => {
     const login = useAuthStore((state) => state.login);
@@ -45,3 +46,14 @@ export const useResetPassword = () => {
         }) => resetPassword(sessionId, otp, newPassword),
     });
 };
+
+export const useFetchUser = () => {
+    return useQuery({
+        queryKey: ["user"],
+        queryFn: () => fetchUserProfile(),
+        retry: false,
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+
+}

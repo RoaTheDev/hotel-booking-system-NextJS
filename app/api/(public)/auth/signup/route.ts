@@ -38,7 +38,10 @@ export const POST = async (req: NextRequest) => {
                 select: {
                     id: true,
                     role: true,
-                    email: true
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    phone: true
                 }
             }
         )

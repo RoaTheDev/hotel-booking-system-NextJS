@@ -1,61 +1,119 @@
-import { ServerSignupFromData } from "@/lib/types/authTypes";
-import { create } from "zustand/react";
-import { persist } from "zustand/middleware";
-import { forgetPasswordApi, loginApi, logoutApi, resetPasswordApi, signupApi } from "@/lib/data/authApi";
+import {create} from "zustand/react";
+import {persist} from "zustand/middleware";
+import {
+    forgetPasswordApi,
+    loginApi,
+    logoutApi,
+    resetPasswordApi,
+    signupApi,
+    updateProfileApi,
+    ValidateSession,
+} from "@/lib/data/authApi";
+import {
+    ForgetPasswordResponse,
+    LoginResponse,
+    ServerSignupFromData,
+    SignupResponse,
+    UserType,
+} from "@/lib/types/authTypes";
+import {ApiResponse} from "@/lib/types/commonTypes";
+import axios, {HttpStatusCode} from "axios";
+import _ from "lodash";
 
-interface AuthUser {
-    email: string;
-    role: string;
-    id: number;
+type UserState = {
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string,
+    phone: string | null,
 }
 
 interface AuthStore {
-    user: AuthUser | null;
-    token: string | null;
-
-    login: (email: string, password: string) => Promise<void>;
-    signup: (data: ServerSignupFromData) => Promise<void>;
-    logout: () => Promise<void>;
-    forgetPassword: (email: string) => Promise<string>;
-    resetPassword: (sessionId: string, otp: string, newPassword: string) => Promise<void>;
-
+    user: UserState | null;
     isAuthenticated: boolean;
+    isHydrated: boolean;
+    login: (email: string, password: string) => Promise<ApiResponse<LoginResponse>>;
+    signup: (data: ServerSignupFromData) => Promise<ApiResponse<SignupResponse>>;
+    logout: () => Promise<void>;
+    setUser: (user: UserState) => void;
+    clearAuth: () => void;
+    forgetPassword: (email: string) => Promise<string | null>;
+    revalidateSession: () => Promise<void>
+    resetPassword: (sessionId: string, otp: string, newPassword: string) => Promise<void>;
+    updateProfile: (data: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone?: string | null;
+    }) => Promise<ApiResponse<UserType>>;
 }
+
+axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response && HttpStatusCode.Unauthorized  === error.response.status) {
+          await useAuthStore().logout();
+        }
+        return Promise.reject(error);
+    }
+);
 
 export const useAuthStore = create<AuthStore>()(
     persist(
-        (set, get) => ({
+        (set) => ({
             user: null,
-            token: null,
-            isAuthenticated:false,
-            // get isAuthenticated() {
-            //     return !!get().token && !!get().user;
-            // },
-            //
-
+            isAuthenticated: false,
+            isHydrated: false,
             login: async (email, password) => {
                 try {
-                    const { data } = await loginApi(email, password);
-                    set({
-                        user: data.data.user,
-                        token: data.data.token,
-                        isAuthenticated :!!get().token && !!get().user
-                    });
+                    const response: ApiResponse<LoginResponse> = await loginApi(email, password);
+                    if (response.success && response.data) {
 
+                        const userWithoutId:UserState = _.omit(response.data.user, ['id']);
+                        set({
+                            user: userWithoutId,
+                            isAuthenticated: true
+                        });
+                    } else {
+                        set({ user: null, isAuthenticated: false });
+                    }
+                    return response;
                 } catch (error) {
+                    set({ user: null, isAuthenticated: false });
                     throw error;
+                }
+            },
+
+
+
+            revalidateSession: async () => {
+                try {
+                    const response = await ValidateSession();
+                    if (response) {
+                       return
+                    } else {
+                        set({ user: null, isAuthenticated: false });
+                    }
+                } catch {
+                    set({ user: null, isAuthenticated: false });
                 }
             },
 
             signup: async (request) => {
                 try {
-                    const { data } = await signupApi(request);
-                    set({
-                        user: data.user,
-                        token: data.token,
-                        isAuthenticated :!!get().token && !!get().user
-                    });
+                    const response: ApiResponse<SignupResponse> = await signupApi(request);
+                    if (response.success && response.data) {
+                        const userWithoutId:UserState = _.omit(response.data.user, ['id']);
+                        set({
+                            user: userWithoutId,
+                            isAuthenticated: true
+                        });
+                    } else {
+                        set({ user: null, isAuthenticated: false });
+                    }
+                    return response;
                 } catch (error) {
+                    set({ user: null, isAuthenticated: false });
                     throw error;
                 }
             },
@@ -63,20 +121,18 @@ export const useAuthStore = create<AuthStore>()(
             logout: async () => {
                 try {
                     await logoutApi();
-                    set({
-                        user: null,
-                        token: null,
-                        isAuthenticated :!!get().token && !!get().user
-                    });
                 } catch (error) {
                     throw error;
+                }finally {
+                    useAuthStore.persist.clearStorage();
                 }
             },
-
+            setUser: (user) => set({ user, isAuthenticated: true }),
+            clearAuth: () => set({ user: null, isAuthenticated: false }),
             forgetPassword: async (email) => {
                 try {
-                    const { data } = await forgetPasswordApi(email);
-                    return data.sessionId;
+                    const response: ApiResponse<ForgetPasswordResponse> = await forgetPasswordApi(email);
+                    return response.success && response.data ? response.data.sessionId : null;
                 } catch (error) {
                     throw error;
                 }
@@ -90,14 +146,30 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-
+            updateProfile: async (data) => {
+                try {
+                    const response: ApiResponse<UserType> = await updateProfileApi(data);
+                    const userWithoutId:UserState = _.omit(response.data, ['id']);
+                    set({ user: userWithoutId });
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
         }),
         {
-            name: "auth-storage",
+            name: "tranquility_user",
             partialize: (state) => ({
                 user: state.user,
-                token: state.token,
+                isAuthenticated: state.isAuthenticated
             }),
-        }
+            onRehydrateStorage: () => {
+                return (state, error) => {
+                    if (!error && state) {
+                        state.isHydrated = true;
+                    }
+                };
+        },
+            }
     )
 );

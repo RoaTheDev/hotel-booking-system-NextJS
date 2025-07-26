@@ -6,13 +6,19 @@ import {usePathname} from 'next/navigation';
 export default function NavigationProgressBar() {
     const [loading, setLoading] = useState(false);
     const pathname = usePathname();
-    const isAnimatingRef = useRef(false);
+    const isNavigatingRef = useRef(false);
+    const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const startProgress = () => {
-            if (isAnimatingRef.current) return;
-            isAnimatingRef.current = true;
+            if (isNavigatingRef.current) return;
+            isNavigatingRef.current = true;
             setLoading(true);
+
+            navigationTimeoutRef.current = setTimeout(() => {
+                setLoading(false);
+                isNavigatingRef.current = false;
+            }, 3000);
         };
 
         const handleLinkClick = (e: MouseEvent) => {
@@ -25,7 +31,8 @@ export default function NavigationProgressBar() {
                 !link.href.startsWith('#') &&
                 !link.href.includes('mailto:') &&
                 !link.href.includes('tel:') &&
-                link.getAttribute('target') !== '_blank'
+                link.getAttribute('target') !== '_blank' &&
+                !link.hasAttribute('download')
             ) {
                 const url = new URL(link.href, window.location.origin);
                 const currentUrl = new URL(window.location.href);
@@ -46,20 +53,27 @@ export default function NavigationProgressBar() {
         return () => {
             document.removeEventListener('click', handleLinkClick, true);
             window.removeEventListener('popstate', handlePopState);
-            isAnimatingRef.current = false;
+            if (navigationTimeoutRef.current) {
+                clearTimeout(navigationTimeoutRef.current);
+            }
         };
     }, []);
 
     useEffect(() => {
-        if (loading && isAnimatingRef.current) {
+        if (isNavigatingRef.current) {
+            if (navigationTimeoutRef.current) {
+                clearTimeout(navigationTimeoutRef.current);
+                navigationTimeoutRef.current = null;
+            }
+
             const timer = setTimeout(() => {
                 setLoading(false);
-                isAnimatingRef.current = false;
-            }, 600);
+                isNavigatingRef.current = false;
+            }, 300);
 
             return () => clearTimeout(timer);
         }
-    }, [pathname, loading]);
+    }, [pathname]);
 
     if (!loading) return null;
 

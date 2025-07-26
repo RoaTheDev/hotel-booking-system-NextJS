@@ -31,6 +31,6 @@ export const verifyToken = (token: string): AppJwtPayload => {
     return jwt.verify(token, JWT_SECRET_KEY, {algorithms: ["HS256"]}) as AppJwtPayload;
 }
 
-export const getTokenFromReq = (request: NextRequest) => {
-    return request.cookies.get("kronii_hotel")?.value || null;
+export const getTokenFromCookie = (request: NextRequest) => {
+    return request.cookies.get("tranquility_token")?.value || null;
 }

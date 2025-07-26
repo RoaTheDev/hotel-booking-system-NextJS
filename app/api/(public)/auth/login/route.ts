@@ -20,7 +20,8 @@ export const POST = async (req: NextRequest) => {
                 id: true,
                 firstName: true,
                 lastName: true,
-                passwordHash: true
+                passwordHash: true,
+                phone: true
             }
         })
 
@@ -47,11 +48,12 @@ export const POST = async (req: NextRequest) => {
             }, {status: HttpStatusCode.Unauthorized})
         }
         const token = generateToken({userId: user.id, role: user.role, email: user.email})
-        const response = NextResponse.json<LoginResponse>({
+        const response = NextResponse.json<ApiResponse<LoginResponse>>({
             message: "Login successfully",
             data: {token, user},
+            success: true
         })
-        response.cookies.set("kronii_hotel", token, {
+        response.cookies.set("tranquility_token", token, {
             httpOnly: true,
             path: "/",
             secure: process.env.NODE_ENV === "production",
