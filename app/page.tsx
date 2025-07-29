@@ -364,7 +364,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$280</span>
-                                    <Link href="/rooms/yamazakura">
+                                    <Link href="/app/(additional-info)/rooms/yamazakura">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -398,7 +398,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$450</span>
-                                    <Link href="/rooms/tsukimi">
+                                    <Link href="/app/(additional-info)/rooms/tsukimi">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -432,7 +432,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$520</span>
-                                    <Link href="/rooms/mizukagami">
+                                    <Link href="/app/(additional-info)/rooms/mizukagami">
                                         <Button
                                             variant="outline"
                                             size="sm"
