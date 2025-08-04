@@ -75,11 +75,12 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             revalidateSession: async () => {
+                const state = useAuthStore.getState();
+                if (!state.isAuthenticated) return;
+
                 try {
                     const response = await ValidateSession();
-                    if (response) {
-                        return
-                    } else {
+                    if (!response) {
                         set({user: null, isAuthenticated: false});
                     }
                 } catch {
@@ -165,9 +166,11 @@ export const useAuthStore = create<AuthStore>()(
 axios.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response && HttpStatusCode.Unauthorized === error.response.status) {
+        if (error.response && error.response.status === HttpStatusCode.Unauthorized) {
             const store = useAuthStore.getState();
-            await store.logout();
+            if (store.isAuthenticated) {
+                await store.logout();
+            }
         }
         return Promise.reject(error);
     }
