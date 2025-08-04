@@ -48,16 +48,6 @@ interface AuthStore {
     }) => Promise<ApiResponse<UserType>>;
 }
 
-axios.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        if (error.response && HttpStatusCode.Unauthorized  === error.response.status) {
-          await useAuthStore().logout();
-        }
-        return Promise.reject(error);
-    }
-);
-
 export const useAuthStore = create<AuthStore>()(
     persist(
         (set) => ({
@@ -69,33 +59,31 @@ export const useAuthStore = create<AuthStore>()(
                     const response: ApiResponse<LoginResponse> = await loginApi(email, password);
                     if (response.success && response.data) {
 
-                        const userWithoutId:UserState = _.omit(response.data.user, ['id']);
+                        const userWithoutId: UserState = _.omit(response.data.user, ['id']);
                         set({
                             user: userWithoutId,
                             isAuthenticated: true
                         });
                     } else {
-                        set({ user: null, isAuthenticated: false });
+                        set({user: null, isAuthenticated: false});
                     }
                     return response;
                 } catch (error) {
-                    set({ user: null, isAuthenticated: false });
+                    set({user: null, isAuthenticated: false});
                     throw error;
                 }
             },
-
-
 
             revalidateSession: async () => {
                 try {
                     const response = await ValidateSession();
                     if (response) {
-                       return
+                        return
                     } else {
-                        set({ user: null, isAuthenticated: false });
+                        set({user: null, isAuthenticated: false});
                     }
                 } catch {
-                    set({ user: null, isAuthenticated: false });
+                    set({user: null, isAuthenticated: false});
                 }
             },
 
@@ -103,17 +91,17 @@ export const useAuthStore = create<AuthStore>()(
                 try {
                     const response: ApiResponse<SignupResponse> = await signupApi(request);
                     if (response.success && response.data) {
-                        const userWithoutId:UserState = _.omit(response.data.user, ['id']);
+                        const userWithoutId: UserState = _.omit(response.data.user, ['id']);
                         set({
                             user: userWithoutId,
                             isAuthenticated: true
                         });
                     } else {
-                        set({ user: null, isAuthenticated: false });
+                        set({user: null, isAuthenticated: false});
                     }
                     return response;
                 } catch (error) {
-                    set({ user: null, isAuthenticated: false });
+                    set({user: null, isAuthenticated: false});
                     throw error;
                 }
             },
@@ -123,12 +111,12 @@ export const useAuthStore = create<AuthStore>()(
                     await logoutApi();
                 } catch (error) {
                     throw error;
-                }finally {
+                } finally {
                     useAuthStore.persist.clearStorage();
                 }
             },
-            setUser: (user) => set({ user, isAuthenticated: true }),
-            clearAuth: () => set({ user: null, isAuthenticated: false }),
+            setUser: (user) => set({user, isAuthenticated: true}),
+            clearAuth: () => set({user: null, isAuthenticated: false}),
             forgetPassword: async (email) => {
                 try {
                     const response: ApiResponse<ForgetPasswordResponse> = await forgetPasswordApi(email);
@@ -149,8 +137,8 @@ export const useAuthStore = create<AuthStore>()(
             updateProfile: async (data) => {
                 try {
                     const response: ApiResponse<UserType> = await updateProfileApi(data);
-                    const userWithoutId:UserState = _.omit(response.data, ['id']);
-                    set({ user: userWithoutId });
+                    const userWithoutId: UserState = _.omit(response.data, ['id']);
+                    set({user: userWithoutId});
                     return response;
                 } catch (error) {
                     throw error;
@@ -169,7 +157,18 @@ export const useAuthStore = create<AuthStore>()(
                         state.isHydrated = true;
                     }
                 };
-        },
-            }
+            },
+        }
     )
+);
+
+axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response && HttpStatusCode.Unauthorized === error.response.status) {
+            const store = useAuthStore.getState();
+            await store.logout();
+        }
+        return Promise.reject(error);
+    }
 );

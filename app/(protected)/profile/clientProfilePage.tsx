@@ -17,7 +17,7 @@ import {useAuthStore} from "@/lib/stores/AuthStore"
 import {ProfileForm, profileSchema} from "@/lib/types/authTypes"
 import {ProfileLoadingSkeleton} from "@/components/skeleton/profileLoadingSkeleton";
 import {toast} from "sonner";
-
+import {useRouter} from "next/navigation";
 
 const mockBookings = [
     {
@@ -58,6 +58,7 @@ const mockBookings = [
 export const ClientProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const route = useRouter();
     const {user, isAuthenticated, isHydrated, updateProfile, logout} = useAuthStore()
     const containerRef = useRef<HTMLDivElement>(null)
     const {
@@ -183,7 +184,10 @@ export const ClientProfilePage = () => {
 
         return () => ctx.revert()
     }, [])
-
+    const onSignOut = async () => {
+        await logout()
+        route.push('/');
+    }
     const onSubmit = async (data: ProfileForm) => {
         setIsLoading(true)
         gsap.to(".save-btn", {scale: 0.95, duration: 0.1})
@@ -302,7 +306,7 @@ export const ClientProfilePage = () => {
                         <div className="flex items-center space-x-4">
                             <span className="text-slate-400">Welcome, {user!.firstName || "Jon doe"}</span>
                             <Button
-                                onClick={logout}
+                                onClick={onSignOut}
                                 variant="ghost"
                                 className="text-slate-300 hover:bg-slate-800 hover:text-red-400 transition-all duration-300"
                             >
@@ -590,7 +594,8 @@ export const ClientProfilePage = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
+                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
+
                                         >
                                             Configure
                                         </Button>
@@ -606,7 +611,8 @@ export const ClientProfilePage = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
+                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
+
                                         >
                                             Manage
                                         </Button>
@@ -622,7 +628,8 @@ export const ClientProfilePage = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
+                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
+
                                         >
                                             Change
                                         </Button>

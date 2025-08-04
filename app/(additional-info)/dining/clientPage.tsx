@@ -131,7 +131,6 @@ export const DiningClientPage = () => {
             </div>
 
 
-
             {/* Hero Section */}
             <section ref={heroRef} className="relative py-20 overflow-hidden">
                 <div className="absolute inset-0 z-0">
@@ -179,7 +178,7 @@ export const DiningClientPage = () => {
                         return (
                             <Card
                                 key={experience.id}
-                                className="experience-card border-0 shadow-2xl overflow-hidden bg-slate-800/50 backdrop-blur-sm hover:shadow-amber-500/10 transition-all duration-500 border border-slate-700/50 group cursor-pointer"
+                                className="experience-card  shadow-2xl overflow-hidden bg-slate-800/50 backdrop-blur-sm hover:shadow-amber-500/10 transition-all duration-500 border border-slate-700/50 group cursor-pointer"
                             >
                                 <div className="relative h-48 overflow-hidden">
                                     <Image
@@ -302,12 +301,12 @@ export const DiningClientPage = () => {
                     </div>
 
                     <div className="text-center mt-12">
-                        <Button
-                            size="lg"
-                            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 px-12 py-4 text-lg font-light tracking-wide shadow-lg hover:shadow-amber-500/25 transition-all duration-500 hover:scale-110"
+                        <Link
+                            href={'/dining/menu'}
+                            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 rounded-lg text-slate-900 px-12 py-4 text-lg font-light tracking-wide shadow-lg hover:shadow-amber-500/25 transition-all duration-500 hover:scale-110"
                         >
                             View Full Menu
-                        </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
