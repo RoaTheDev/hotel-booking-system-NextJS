@@ -18,6 +18,7 @@ import {ProfileForm, profileSchema} from "@/lib/types/authTypes"
 import {ProfileLoadingSkeleton} from "@/components/skeleton/profileLoadingSkeleton";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
+import {useLogout} from "@/lib/query/authHooks";
 
 const mockBookings = [
     {
@@ -59,7 +60,8 @@ export const ClientProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const route = useRouter();
-    const {user, isAuthenticated, isHydrated, updateProfile, logout} = useAuthStore()
+    const logout = useLogout()
+    const {user, isAuthenticated, isHydrated, updateProfile} = useAuthStore()
     const containerRef = useRef<HTMLDivElement>(null)
     const {
         register,
@@ -185,7 +187,7 @@ export const ClientProfilePage = () => {
         return () => ctx.revert()
     }, [])
     const onSignOut = async () => {
-        await logout()
+        await logout.mutateAsync()
         route.push('/');
     }
     const onSubmit = async (data: ProfileForm) => {
