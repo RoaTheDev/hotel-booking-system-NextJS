@@ -69,10 +69,10 @@ export type UserType = {
 }
 
 
-
 export type LoginResponse = {
-        token: string,
-        user: UserType
+    token: string,
+    user: UserType,
+    redirectUrl: string
 }
 
 

@@ -247,12 +247,7 @@ export const OnsenClientPage = () => {
                                         </ul>
                                     </div>
 
-                                    <Button
-                                        size="sm"
-                                        className="w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-slate-900 font-light shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
-                                    >
-                                        Reserve Onsen Experience
-                                    </Button>
+
                                 </CardContent>
                             </Card>
                         )

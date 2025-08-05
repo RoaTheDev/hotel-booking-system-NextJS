@@ -48,9 +48,10 @@ export const POST = async (req: NextRequest) => {
             }, {status: HttpStatusCode.Unauthorized})
         }
         const token = generateToken({userId: user.id, role: user.role, email: user.email})
+        const redirectUrl =  user.role === 'ADMIN' ? '/admin' : '/';
         const response = NextResponse.json<ApiResponse<LoginResponse>>({
             message: "Login successfully",
-            data: {token, user},
+            data: {token, user,redirectUrl},
             success: true
         })
         response.cookies.set("tranquility_token", token, {

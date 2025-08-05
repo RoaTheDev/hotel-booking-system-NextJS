@@ -249,12 +249,7 @@ export const DiningClientPage = () => {
                                         <p className="text-xs text-slate-400 italic leading-relaxed">{experience.philosophy}</p>
                                     </div>
 
-                                    <Button
-                                        size="sm"
-                                        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-light shadow-lg hover:shadow-amber-500/25 transition-all duration-300"
-                                    >
-                                        Reserve Experience
-                                    </Button>
+
                                 </CardContent>
                             </Card>
                         )

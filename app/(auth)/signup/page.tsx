@@ -1,17 +1,17 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { gsap } from "gsap"
+import {useEffect, useRef, useState} from "react"
+import {useForm} from "react-hook-form"
+import {zodResolver} from "@hookform/resolvers/zod"
+import {gsap} from "gsap"
 import Link from "next/link"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff } from "lucide-react"
-import {SignupFormData,SignupFormSchema} from "@/lib/types/authTypes";
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
+import {Eye, EyeOff} from "lucide-react"
+import {SignupFormData, SignupFormSchema} from "@/lib/types/authTypes";
 import {useSignup} from "@/lib/query/authHooks";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";

@@ -240,12 +240,7 @@ export const GardenClientPage: FC<GardenPageProps> = ({ gardenSections }) => {
                                         <p className="text-xs text-slate-400 italic leading-relaxed">{section.philosophy}</p>
                                     </div>
 
-                                    <Button
-                                        size="sm"
-                                        className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-slate-900 font-light shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
-                                    >
-                                        Explore This Space
-                                    </Button>
+
                                 </CardContent>
                             </Card>
                         );

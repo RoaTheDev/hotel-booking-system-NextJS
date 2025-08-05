@@ -50,6 +50,8 @@ export const RoomQuerySchema = z.object({
     available: z.string().optional().transform(val => val === "true"),
     checkIn: z.string().optional(),
     checkOut: z.string().optional(),
+    search: z.string().optional(),
+
 });
 
 export const BookingQuerySchema = z.object({
@@ -91,9 +93,7 @@ export interface RoomWithDetails {
         imageUrl: string;
         caption: string | null;
     }>;
-    _count: {
-        bookings: number;
-    };
+
 }
 
 export interface BookingWithDetails {

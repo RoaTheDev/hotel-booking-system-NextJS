@@ -6,17 +6,17 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {gsap} from "gsap";
 import Link from "next/link";
 import Image from "next/image";
+import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form"; // Import Shadcn form components
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Eye, EyeOff} from "lucide-react";
 import {LoginFormData, LoginFormSchema} from "@/lib/types/authTypes";
 import {useLogin} from "@/lib/query/authHooks";
-import {useAuthStore} from "@/lib/stores/AuthStore";
-import {useRouter} from "next/navigation";
 import {Modal} from "@/components/Modal";
 import {toast} from "sonner";
+import {useAuthStore} from "@/lib/stores/AuthStore";
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -24,19 +24,24 @@ export default function LoginPage() {
     const formRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
     const login = useLogin();
-    const {user} = useAuthStore();
-    const router = useRouter();
     const [modalOpen, setModalOpen] = useState(false);
+    const router = useRouter();
+    const {isAuthenticated, isHydrated} = useAuthStore();
 
-    // Initialize the form with react-hook-form
     const form = useForm<LoginFormData>({
         resolver: zodResolver(LoginFormSchema),
         mode: "onChange",
         defaultValues: {
-            email: "", // Ensure email starts as an empty string
-            password: "", // Ensure password starts as an empty string
+            email: "",
+            password: "",
         },
     });
+
+    useEffect(() => {
+        if (isHydrated && isAuthenticated) {
+            router.replace("/");
+        }
+    }, [isHydrated, isAuthenticated, router]);
 
     const openModal = () => {
         setModalOpen(true);
@@ -108,8 +113,8 @@ export default function LoginPage() {
         gsap.to(".submit-btn", {scale: 0.95, duration: 0.1});
 
         try {
-            await login.mutateAsync(data);
-            toast.success("Login successfully")
+            const res = await login.mutateAsync(data);
+            toast.success("Login successfully");
             gsap.to(".form-content", {
                 scale: 1.05,
                 duration: 0.3,
@@ -117,18 +122,27 @@ export default function LoginPage() {
                 repeat: 1,
                 ease: "power2.inOut",
             });
-            router.push(user?.role.toUpperCase() === "ADMIN" ? "/admin/dashboard" : "/");
+            if (res.data) {
+                router.replace(res.data.redirectUrl)
+            } else {
+                router.replace('/')
+            }
         } catch {
             gsap.to(".form-content", {
                 keyframes: [{x: -10}, {x: 10}, {x: -10}, {x: 10}, {x: 0}],
                 duration: 0.5,
                 ease: "power2.inOut",
             });
-            openModal()
+            openModal();
         } finally {
             gsap.to(".submit-btn", {scale: 1, duration: 0.2});
         }
     };
+
+    if (!isHydrated) {
+        return null;
+    }
+
 
     return (
         <>
@@ -144,15 +158,17 @@ export default function LoginPage() {
             >
                 <div className="fixed inset-0 pointer-events-none">
                     <div
-                        className="floating-element floating-1 absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-xl"></div>
+                        className="floating-element floating-1 absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-xl"
+                    ></div>
                     <div
-                        className="floating-element floating-2 absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full blur-xl"></div>
+                        className="floating-element floating-2 absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full blur-xl"
+                    ></div>
                     <div
-                        className="floating-element absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl"></div>
+                        className="floating-element absolute bottom-40 left-1/4 w-40 h-40 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl"
+                    ></div>
                 </div>
 
                 <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
-
                     <div
                         ref={imageRef}
                         className="image-content hidden lg:block relative h-[600px] rounded-2xl overflow-hidden"
@@ -163,18 +179,19 @@ export default function LoginPage() {
                             fill
                             className="object-cover"
                         />
-
                         <div
                             className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-10"/>
-
                         <div className="absolute top-6 left-6 z-20">
                             <Link href="/" className="inline-flex items-center space-x-3">
                                 <div
-                                    className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-sm flex items-center justify-center shadow-lg">
+                                    className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-sm flex items-center justify-center shadow-lg"
+                                >
                                     <div className="w-6 h-6 border-2 border-slate-100 rounded-full"></div>
                                 </div>
                                 <div className="text-left">
-                                    <span className="text-xl font-light text-slate-100 tracking-wide block">Tranquility Inn</span>
+                  <span className="text-xl font-light text-slate-100 tracking-wide block">
+                    Tranquility Inn
+                  </span>
                                     <span className="text-xs text-slate-400 tracking-widest">MOUNTAIN RETREAT</span>
                                 </div>
                             </Link>
@@ -183,7 +200,6 @@ export default function LoginPage() {
 
                     <div ref={formRef} className="w-full max-w-md mx-auto">
                         <div className="form-content text-center mb-8">
-
                             <h1 className="text-3xl font-light text-slate-100 mb-2">Welcome Back</h1>
                             <p className="text-slate-400">Enter your credentials to continue your journey</p>
                         </div>

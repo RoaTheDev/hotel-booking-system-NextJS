@@ -11,7 +11,7 @@ interface RouteParams {
     params: { id: string };
 }
 
-export const GET = async ({params}: RouteParams) => {
+export const GET = async (_: NextRequest,{ params }: { params: { id: string } }) => {
     try {
         const roomId = parseInt(params.id);
 
@@ -38,9 +38,7 @@ export const GET = async ({params}: RouteParams) => {
                     },
                 },
                 images: true,
-                _count: {
-                    select: {bookings: true},
-                },
+
             },
         });
 
@@ -61,7 +59,6 @@ export const GET = async ({params}: RouteParams) => {
             },
             amenities: room.amenities,
             images: room.images,
-            _count: room._count,
         };
 
         return NextResponse.json<ApiResponse<RoomWithDetails>>({
@@ -156,9 +153,7 @@ export const PATCH = async (req: NextRequest, {params}: RouteParams) => {
                     },
                 },
                 images: true,
-                _count: {
-                    select: {bookings: true},
-                },
+
             },
         });
 
@@ -170,7 +165,6 @@ export const PATCH = async (req: NextRequest, {params}: RouteParams) => {
             },
             amenities: room.amenities,
             images: room.images,
-            _count: room._count,
         };
 
         return NextResponse.json<ApiResponse<RoomWithDetails>>({
