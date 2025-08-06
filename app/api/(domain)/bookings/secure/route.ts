@@ -16,33 +16,37 @@ export const POST = async (req: NextRequest) => {
         const body = await req.json();
         const bookingData = BookingCreateSchema.parse(body);
 
-        const {userId, roomId, checkIn, checkOut, guests, specialRequests} = bookingData;
+        const { userId, roomId, checkIn, checkOut, guests, specialRequests } = bookingData;
 
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
 
-        const roomAvailability = await prisma.roomAvailability.findMany({
+        const conflictingBookings = await prisma.booking.findMany({
             where: {
-                roomId: roomId,
-                isAvailable: true,
-                date: {
-                    gte: checkInDate,
-                    lte: checkOutDate,
-                },
+                roomId,
+                status: { notIn: ['CANCELLED', 'COMPLETED'] },
+                OR: [
+                    {
+                        AND: [
+                            { checkIn: { lte: checkOutDate } },
+                            { checkOut: { gte: checkInDate } },
+                        ],
+                    },
+                ],
             },
         });
 
-        if (roomAvailability.length === 0) {
+        if (conflictingBookings.length > 0) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
-                message: "Room is not available for the selected dates.",
+                message: "Room is not available for the selected dates due to existing bookings.",
                 data: null,
-                errors: {type: "RoomAvailabilityError"},
-            }, {status: HttpStatusCode.BadRequest});
+                errors: { type: "RoomAvailabilityError" },
+            }, { status: HttpStatusCode.BadRequest });
         }
 
         const room = await prisma.room.findUnique({
-            where: {id: roomId},
+            where: { id: roomId },
             include: {
                 roomType: true,
             },
@@ -53,8 +57,8 @@ export const POST = async (req: NextRequest) => {
                 success: false,
                 message: "Room not found.",
                 data: null,
-                errors: {type: "RoomError"},
-            }, {status: HttpStatusCode.NotFound});
+                errors: { type: "RoomError" },
+            }, { status: HttpStatusCode.NotFound });
         }
 
         const totalAmount = room.roomType.basePrice.toNumber() * guests;
@@ -105,6 +109,7 @@ export const POST = async (req: NextRequest) => {
                 isAvailable: false,
             },
         });
+
         const formatBookingData = {
             ...booking,
             totalAmount: booking.totalAmount.toNumber(),
@@ -122,15 +127,14 @@ export const POST = async (req: NextRequest) => {
             message: "Booking created successfully",
             data: formatBookingData,
         });
-
     } catch (err) {
         if (err instanceof AuthError) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: err.message,
                 data: null,
-                errors: {type: "AuthError"},
-            }, {status: err.statusCode});
+                errors: { type: "AuthError" },
+            }, { status: err.statusCode });
         }
 
         if (err instanceof ZodError) {
@@ -139,7 +143,7 @@ export const POST = async (req: NextRequest) => {
                 message: "Invalid input data",
                 data: null,
                 errors: validationErrorFormat(err),
-            }, {status: HttpStatusCode.BadRequest});
+            }, { status: HttpStatusCode.BadRequest });
         }
 
         console.error("Error creating booking:", err);
@@ -147,8 +151,8 @@ export const POST = async (req: NextRequest) => {
             success: false,
             message: "Error creating booking",
             data: null,
-            errors: {type: "ServerError"},
-        }, {status: HttpStatusCode.InternalServerError});
+            errors: { type: "ServerError" },
+        }, { status: HttpStatusCode.InternalServerError });
     }
 };
 export const GET = async (req: NextRequest) => {

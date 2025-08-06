@@ -13,13 +13,12 @@ export const GET = async (request: NextRequest) => {
                 , {status: HttpStatusCode.Unauthorized})
         }
         const payload = verifyToken(token)
-        console.log(`payload : ${payload.userId}`)
 
-      if(!payload){
-          return NextResponse.json(
-              {message: "You are not authorized or expired session"}
-              , {status: HttpStatusCode.Unauthorized})
-      }
+        if (!payload) {
+            return NextResponse.json(
+                {message: "You are not authorized or expired session"}
+                , {status: HttpStatusCode.Unauthorized})
+        }
         return NextResponse.json({message: "session's still active"},
             {status: HttpStatusCode.Ok})
 

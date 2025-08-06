@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const requestCache = new Map<string, { count: number; timestamp: number }>();
 
-const RATE_LIMIT = 50;
+const RATE_LIMIT = 100;
 const WINDOW_TIME = 60 * 1000;
 
 const protectedRoutes = [

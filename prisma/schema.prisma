@@ -17,6 +17,7 @@ datasource db {
 enum Role {
   GUEST
   ADMIN
+  STAFF
 }
 
 enum BookingStatus {

@@ -4,30 +4,101 @@ import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
 import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
 import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {AuthError, requireAuth} from "@/lib/middleware/auth";
-import {BookingWithDetails, CreateBookingData, CreateBookingSchema} from "@/lib/types/roomTypes";
-import {BookingStatus, Prisma} from "@/app/generated/prisma";
+import {AuthError, requireAdminAuth, requireAuth} from "@/lib/middleware/auth";
+import {BookingQuerySchema, BookingWithDetails, CreateBookingData, CreateBookingSchema} from "@/lib/types/roomTypes";
+import {BookingStatus, Prisma, Role} from "@/app/generated/prisma";
 import BookingWhereInput = Prisma.BookingWhereInput;
 
+export interface User {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+}
+
+export interface Room {
+    id: number;
+    roomNumber: string;
+    roomType: {
+        id: number;
+        name: string;
+        basePrice: number;
+    };
+}
+
+export interface BookingsResponse {
+    bookings: BookingWithDetails[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalCount: number;
+        totalPages: number;
+    };
+    users: User[];
+    rooms: Room[];
+}
 
 export const GET = async (req: NextRequest) => {
     try {
-        const user = requireAuth(req);
+        requireAdminAuth(req);
 
         const {searchParams} = new URL(req.url);
-        const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "10");
-        const status = searchParams.get("status") || "";
+        const queryParams = Object.fromEntries(searchParams.entries());
+
+        const {
+            page = 1,
+            limit = 10,
+            status = "ALL",
+            userId,
+            roomId,
+            checkIn,
+            checkOut
+        } = BookingQuerySchema.parse(queryParams);
 
         const skip = (page - 1) * limit;
 
-        const where: BookingWhereInput = {userId: user.userId};
+        const where: BookingWhereInput = {};
 
-        if (status && status !== "ALL") {
+        if (status !== "ALL") {
             where.status = status as BookingStatus;
         }
 
-        const [bookings, totalCount] = await Promise.all([
+        if (userId) {
+            where.userId = userId;
+        }
+
+        if (roomId) {
+            where.roomId = roomId;
+        }
+
+        if (checkIn && checkOut) {
+            const checkInDate = new Date(checkIn);
+            const checkOutDate = new Date(checkOut);
+
+            where.OR = [
+                {
+                    AND: [
+                        {checkIn: {gte: checkInDate}},
+                        {checkIn: {lte: checkOutDate}}
+                    ]
+                },
+                {
+                    AND: [
+                        {checkOut: {gte: checkInDate}},
+                        {checkOut: {lte: checkOutDate}}
+                    ]
+                },
+                {
+                    AND: [
+                        {checkIn: {lte: checkInDate}},
+                        {checkOut: {gte: checkOutDate}}
+                    ]
+                }
+            ];
+        }
+
+        const [bookings, totalCount, users, rooms] = await Promise.all([
             prisma.booking.findMany({
                 where,
                 include: {
@@ -56,7 +127,48 @@ export const GET = async (req: NextRequest) => {
                 take: limit,
             }),
             prisma.booking.count({where}),
+            prisma.user.findMany({
+                where: {
+                    isDeleted: false,
+                    role: Role.GUEST
+                },
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phone: true
+                }
+            }),
+            // Fetch all active rooms
+            prisma.room.findMany({
+                where: {
+                    isActive: true,
+                    isDeleted: false
+                },
+                include: {
+                    roomType: {
+                        select: {
+                            id: true,
+                            name: true,
+                            basePrice: true
+                        }
+                    }
+                }
+            })
         ]);
+
+        const bookingsWithDetails = bookings.map((booking) => ({
+            ...booking,
+            totalAmount: booking.totalAmount.toNumber(),
+            room: {
+                ...booking.room,
+                roomType: {
+                    ...booking.room.roomType,
+                    basePrice: booking.room.roomType.basePrice.toNumber()
+                }
+            }
+        })) as BookingWithDetails[];
 
         const totalPages = Math.ceil(totalCount / limit);
 
@@ -68,27 +180,27 @@ export const GET = async (req: NextRequest) => {
                 totalCount: number;
                 totalPages: number;
             };
+            users: User[];
+            rooms: Room[];
         }>>({
             success: true,
-            message: "Bookings retrieved successfully",
+            message: "Bookings, users, and rooms retrieved successfully",
             data: {
-                bookings: bookings.map(booking => ({
-                    ...booking,
-                    totalAmount: booking.totalAmount.toNumber(),
-                    room: {
-                        ...booking.room,
-                        roomType: {
-                            ...booking.room.roomType,
-                            basePrice: booking.room.roomType.basePrice.toNumber(),
-                        },
-                    },
-                })),
+                bookings: bookingsWithDetails,
                 pagination: {
                     page,
                     limit,
                     totalCount,
                     totalPages,
                 },
+                users,
+                rooms: rooms.map(room => ({
+                    ...room,
+                    roomType: {
+                        ...room.roomType,
+                        basePrice: room.roomType.basePrice.toNumber()
+                    }
+                }))
             },
         });
 
@@ -102,6 +214,15 @@ export const GET = async (req: NextRequest) => {
             }, {status: err.statusCode});
         }
 
+        if (err instanceof ZodError) {
+            return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                success: false,
+                message: "Invalid query parameters",
+                data: null,
+                errors: validationErrorFormat(err),
+            }, {status: HttpStatusCode.BadRequest});
+        }
+
         console.error("Error fetching bookings:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
             errors: {type: "ServerError"},
@@ -111,7 +232,6 @@ export const GET = async (req: NextRequest) => {
         }, {status: HttpStatusCode.InternalServerError});
     }
 };
-
 export const POST = async (req: NextRequest) => {
     try {
         const user = requireAuth(req);

@@ -13,6 +13,7 @@ import BookingWhereInput = Prisma.BookingWhereInput;
 interface RouteParams {
     params: { id: string };
 }
+
 export const GET = async (req: NextRequest, { params }: RouteParams) => {
     try {
         const user = requireAuth(req);
@@ -214,7 +215,6 @@ export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
             }, { status: err.statusCode });
         }
 
-        console.error("Error cancelling booking:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
             errors: { type: "ServerError" },
             data: null,
@@ -233,12 +233,16 @@ const BookingStatusUpdateSchema = z.object({
         .optional()
         .transform(val => val?.trim() || undefined),
     checkInTime: z.string()
-        .refine(val => !isNaN(Date.parse(val)), { message: "Invalid check-in time format" })
-        .optional(),
+        .optional()
+        .transform(val => (val && !isNaN(Date.parse(val)) ? val : undefined))
+        .refine(val => !val || !isNaN(Date.parse(val)), { message: "Invalid check-in time format" }),
     checkOutTime: z.string()
-        .refine(val => !isNaN(Date.parse(val)), { message: "Invalid check-out time format" })
-        .optional(),
+        .optional()
+        .transform(val => (val && !isNaN(Date.parse(val)) ? val : undefined))
+        .refine(val => !val || !isNaN(Date.parse(val)), { message: "Invalid check-out time format" }),
 });
+
+export type BookingStatusUpdateType = z.infer<typeof BookingStatusUpdateSchema>;
 
 export const PATCH = async (req: NextRequest, { params }: { params: { id: string } }) => {
     try {
@@ -255,7 +259,10 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json();
-        const { status, reason, checkInTime, checkOutTime } = BookingStatusUpdateSchema.parse(body);
+        console.log("Received PATCH request body:", body);
+        const parsedData = BookingStatusUpdateSchema.parse(body);
+        console.log("Parsed data:", parsedData);
+        const { status, reason, checkInTime, checkOutTime } = parsedData;
 
         const existingBooking = await prisma.booking.findUnique({
             where: { id: bookingId },
@@ -318,14 +325,6 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
 
         if (status === "COMPLETED" && checkOutTime) {
             updateData.checkOutTime = new Date(checkOutTime);
-        }
-
-        if (status === "CONFIRMED" && !checkInTime) {
-            updateData.checkInTime = new Date();
-        }
-
-        if (status === "COMPLETED" && !checkOutTime) {
-            updateData.checkOutTime = new Date();
         }
 
         const updatedBooking = await prisma.$transaction(async (tx) => {
@@ -395,7 +394,6 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
             return booking;
         });
 
-        // Format the response data
         const formatBookingData: BookingWithDetails = {
             ...updatedBooking,
             totalAmount: updatedBooking.totalAmount.toNumber(),
