@@ -14,21 +14,21 @@ interface RouteParams {
     params: { id: string };
 }
 
-export const GET = async (req: NextRequest, { params }: RouteParams) => {
+export const GET = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
         const user = requireAuth(req);
-
-        const bookingId = parseInt(params.id);
+        const {id} = await context.params
+        const bookingId = parseInt(id);
         if (isNaN(bookingId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid booking ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
-        const where: BookingWhereInput = { id: bookingId };
+        const where: BookingWhereInput = {id: bookingId};
         if (user.role !== Role.ADMIN) {
             where.userId = user.userId;
         }
@@ -63,8 +63,8 @@ export const GET = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: "Booking not found",
                 data: null,
-                errors: { type: "NotFound" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFound"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         const formattedBooking = {
@@ -91,21 +91,21 @@ export const GET = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error fetching booking:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error fetching booking",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 };
 
-export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
+export const DELETE = async (req: NextRequest, {params}: RouteParams) => {
     try {
         const user = requireAuth(req);
 
@@ -115,24 +115,24 @@ export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: "Invalid booking ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
-        const where: BookingWhereInput = { id: bookingId };
+        const where: BookingWhereInput = {id: bookingId};
         if (user.role !== Role.ADMIN) {
             where.userId = user.userId;
         }
 
-        const booking = await prisma.booking.findFirst({ where });
+        const booking = await prisma.booking.findFirst({where});
 
         if (!booking) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Booking not found",
                 data: null,
-                errors: { type: "NotFound" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFound"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         if (booking.status === "CANCELLED") {
@@ -140,8 +140,8 @@ export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: "Booking is already cancelled",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         if (booking.status === "COMPLETED") {
@@ -149,14 +149,14 @@ export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: "Cannot cancel completed booking",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const [cancelledBooking] = await Promise.all([
             prisma.booking.update({
-                where: { id: bookingId },
-                data: { status: "CANCELLED" },
+                where: {id: bookingId},
+                data: {status: "CANCELLED"},
                 include: {
                     user: {
                         select: {
@@ -211,61 +211,61 @@ export const DELETE = async (req: NextRequest, { params }: RouteParams) => {
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error cancelling booking",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 };
 
 const BookingStatusUpdateSchema = z.object({
     status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"], {
-        errorMap: () => ({ message: "Status must be PENDING, CONFIRMED, CANCELLED, or COMPLETED" })
+        errorMap: () => ({message: "Status must be PENDING, CONFIRMED, CANCELLED, or COMPLETED"})
     }),
     reason: z.string()
-        .max(255, { message: "Reason cannot exceed 255 characters" })
+        .max(255, {message: "Reason cannot exceed 255 characters"})
         .optional()
         .transform(val => val?.trim() || undefined),
     checkInTime: z.string()
         .optional()
         .transform(val => (val && !isNaN(Date.parse(val)) ? val : undefined))
-        .refine(val => !val || !isNaN(Date.parse(val)), { message: "Invalid check-in time format" }),
+        .refine(val => !val || !isNaN(Date.parse(val)), {message: "Invalid check-in time format"}),
     checkOutTime: z.string()
         .optional()
         .transform(val => (val && !isNaN(Date.parse(val)) ? val : undefined))
-        .refine(val => !val || !isNaN(Date.parse(val)), { message: "Invalid check-out time format" }),
+        .refine(val => !val || !isNaN(Date.parse(val)), {message: "Invalid check-out time format"}),
 });
 
 export type BookingStatusUpdateType = z.infer<typeof BookingStatusUpdateSchema>;
 
-export const PATCH = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const PATCH = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const bookingId = parseInt(params.id);
+        const {id} = await context.params
+        const bookingId = parseInt(id);
         if (isNaN(bookingId) || bookingId <= 0) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid booking ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const body = await req.json();
         console.log("Received PATCH request body:", body);
         const parsedData = BookingStatusUpdateSchema.parse(body);
         console.log("Parsed data:", parsedData);
-        const { status, reason, checkInTime, checkOutTime } = parsedData;
+        const {status, reason, checkInTime, checkOutTime} = parsedData;
 
         const existingBooking = await prisma.booking.findUnique({
-            where: { id: bookingId },
+            where: {id: bookingId},
             include: {
                 user: {
                     select: {
@@ -294,8 +294,8 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
                 success: false,
                 message: "Booking not found",
                 data: null,
-                errors: { type: "NotFound" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFound"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         const validTransitions: Record<BookingStatus, BookingStatus[]> = {
@@ -310,8 +310,8 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
                 success: false,
                 message: `Cannot change status from ${existingBooking.status} to ${status}`,
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const updateData: BookingUpdateData = {
@@ -329,7 +329,7 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
 
         const updatedBooking = await prisma.$transaction(async (tx) => {
             const booking = await tx.booking.update({
-                where: { id: bookingId },
+                where: {id: bookingId},
                 data: updateData,
                 include: {
                     user: {
@@ -418,8 +418,8 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         if (err instanceof ZodError) {
@@ -428,7 +428,7 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
                 message: "Invalid input data",
                 data: null,
                 errors: validationErrorFormat(err),
-            }, { status: HttpStatusCode.BadRequest });
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         console.error("Error updating booking status:", err);
@@ -436,8 +436,8 @@ export const PATCH = async (req: NextRequest, { params }: { params: { id: string
             success: false,
             message: "Error updating booking status",
             data: null,
-            errors: { type: "ServerError" },
-        }, { status: HttpStatusCode.InternalServerError });
+            errors: {type: "ServerError"},
+        }, {status: HttpStatusCode.InternalServerError});
     }
 };
 

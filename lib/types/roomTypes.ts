@@ -30,7 +30,7 @@ export const CreateBookingSchema = z.object({
     roomId: z.number().int().positive(),
     checkIn: z.string().datetime(),
     checkOut: z.string().datetime(),
-    guests: z.number().int().positive().default(1),
+    guests: z.number().int().positive(),
     specialRequests: z.string().optional(),
 });
 

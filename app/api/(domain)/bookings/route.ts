@@ -4,7 +4,7 @@ import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
 import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
 import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {AuthError, requireAdminAuth, requireAuth} from "@/lib/middleware/auth";
+import {AuthError, requireAuth} from "@/lib/middleware/auth";
 import {BookingQuerySchema, BookingWithDetails, CreateBookingData, CreateBookingSchema} from "@/lib/types/roomTypes";
 import {BookingStatus, Prisma, Role} from "@/app/generated/prisma";
 import BookingWhereInput = Prisma.BookingWhereInput;
@@ -41,8 +41,7 @@ export interface BookingsResponse {
 
 export const GET = async (req: NextRequest) => {
     try {
-        requireAdminAuth(req);
-
+        requireAuth(req)
         const {searchParams} = new URL(req.url);
         const queryParams = Object.fromEntries(searchParams.entries());
 

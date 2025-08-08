@@ -12,55 +12,41 @@ import {Label} from "@/components/ui/label"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Badge} from "@/components/ui/badge"
 import {Separator} from "@/components/ui/separator"
-import {Calendar, Clock, Edit, LogOut, MapPin, Save, Settings, Star, User, X} from "lucide-react"
+import {Calendar, Clock, Edit, LogOut, MapPin, Save, Settings, User, X} from "lucide-react"
 import {useAuthStore} from "@/lib/stores/AuthStore"
 import {ProfileForm, profileSchema} from "@/lib/types/authTypes"
 import {ProfileLoadingSkeleton} from "@/components/skeleton/profileLoadingSkeleton";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 import {useLogout} from "@/lib/query/authHooks";
+import {useCancelBooking, useUserBookings} from "@/lib/query/bookingHooks";
+import {format} from "date-fns";
 
-const mockBookings = [
-    {
-        id: 1,
-        roomName: "Mountain Cherry",
-        checkIn: "2024-03-15",
-        checkOut: "2024-03-18",
-        guests: 2,
-        status: "CONFIRMED",
-        totalAmount: 840,
-        specialRequests: "Late check-in requested",
-        rating: 4.8,
-    },
-    {
-        id: 2,
-        roomName: "Moon Viewing",
-        checkIn: "2024-02-10",
-        checkOut: "2024-02-13",
-        guests: 2,
-        status: "COMPLETED",
-        totalAmount: 1350,
-        specialRequests: null,
-        rating: 4.9,
-    },
-    {
-        id: 3,
-        roomName: "Water Mirror",
-        checkIn: "2024-04-20",
-        checkOut: "2024-04-25",
-        guests: 3,
-        status: "PENDING",
-        totalAmount: 2600,
-        specialRequests: "Anniversary celebration",
-        rating: null,
-    },
-]
 
 export const ClientProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const route = useRouter();
     const logout = useLogout()
+    const [bookingStatus, setBookingStatus] = useState<string>("ALL")
+    const [currentPage, setCurrentPage] = useState(1)
+
+    const { data: bookingsData, isLoading: bookingsLoading } = useUserBookings({
+        page: currentPage,
+        limit: 10,
+        status: bookingStatus
+    })
+
+    const cancelBooking = useCancelBooking()
+
+    const handleCancelBooking = async (bookingId: number) => {
+        if (window.confirm("Are you sure you want to cancel this booking?")) {
+            await cancelBooking.mutateAsync({
+                bookingId,
+                reason: "Cancelled by guest"
+            })
+        }
+    }
     const {user, isAuthenticated, isHydrated, updateProfile} = useAuthStore()
     const containerRef = useRef<HTMLDivElement>(null)
     const {
@@ -472,108 +458,193 @@ export const ClientProfilePage = () => {
                     <TabsContent value="bookings">
                         <Card className="border-0 shadow-2xl bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
                             <CardHeader>
-                                <CardTitle className="text-2xl font-light text-slate-100">Booking History</CardTitle>
+                                <div className="flex justify-between items-center">
+                                    <CardTitle className="text-2xl font-light text-slate-100">Booking History</CardTitle>
+
+                                    {/* Status Filter */}
+                                    <div className="flex gap-2">
+                                        {["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"].map((status) => (
+                                            <Button
+                                                key={status}
+                                                variant={bookingStatus === status ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => {
+                                                    setBookingStatus(status)
+                                                    setCurrentPage(1)
+                                                }}
+                                                className={
+                                                    bookingStatus === status
+                                                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900"
+                                                        : "border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent"
+                                                }
+                                            >
+                                                {status}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-6">
-                                    {mockBookings.map((booking) => (
-                                        <div
-                                            key={booking.id}
-                                            className="booking-card border border-slate-700/50 rounded-lg p-6 bg-slate-700/20 backdrop-blur-sm hover:bg-slate-700/30 transition-all duration-300"
-                                        >
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className="text-lg font-medium text-slate-100 mb-1">{booking.roomName}</h3>
-                                                    <p className="text-slate-400 text-sm">Booking #{booking.id}</p>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    {booking.rating && (
-                                                        <div className="flex items-center gap-1">
-                                                            <Star className="h-4 w-4 fill-amber-400 text-amber-400"/>
-                                                            <span
-                                                                className="text-amber-400 text-sm font-medium">{booking.rating}</span>
-                                                        </div>
-                                                    )}
-                                                    <Badge
-                                                        className={`${getStatusColor(booking.status)} border`}>{booking.status}</Badge>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid md:grid-cols-4 gap-4 mb-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="h-4 w-4 text-slate-400"/>
+                                {bookingsLoading ? (
+                                    <div className="text-center py-8">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                                        <p className="text-slate-400">Loading your bookings...</p>
+                                    </div>
+                                ) : !bookingsData?.bookings.length ? (
+                                    <div className="text-center py-12">
+                                        <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Calendar className="h-8 w-8 text-slate-400" />
+                                        </div>
+                                        <h3 className="text-lg font-medium text-slate-100 mb-2">No Bookings Found</h3>
+                                        <p className="text-slate-400 mb-6">
+                                            {bookingStatus === "ALL"
+                                                ? "You haven't made any bookings yet."
+                                                : `No ${bookingStatus.toLowerCase()} bookings found.`
+                                            }
+                                        </p>
+                                        <Link href="/">
+                                            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900">
+                                                Browse Rooms
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {bookingsData.bookings.map((booking) => (
+                                            <div
+                                                key={booking.id}
+                                                className="booking-card border border-slate-700/50 rounded-lg p-6 bg-slate-700/20 backdrop-blur-sm hover:bg-slate-700/30 transition-all duration-300"
+                                            >
+                                                <div className="flex justify-between items-start mb-4">
                                                     <div>
-                                                        <p className="text-xs text-slate-500">Check-in</p>
-                                                        <p className="font-medium text-slate-200">{booking.checkIn}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4 text-slate-400"/>
-                                                    <div>
-                                                        <p className="text-xs text-slate-500">Check-out</p>
-                                                        <p className="font-medium text-slate-200">{booking.checkOut}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <User className="h-4 w-4 text-slate-400"/>
-                                                    <div>
-                                                        <p className="text-xs text-slate-500">Guests</p>
-                                                        <p className="font-medium text-slate-200">
-                                                            {booking.guests} guest{booking.guests !== 1 ? "s" : ""}
+                                                        <h3 className="text-lg font-medium text-slate-100 mb-1">
+                                                            {booking.room.roomType.name}
+                                                        </h3>
+                                                        <p className="text-slate-400 text-sm">
+                                                            Booking #{booking.id} • Room {booking.room.roomNumber}
                                                         </p>
                                                     </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <Badge className={`${getStatusColor(booking.status)} border`}>
+                                                            {booking.status}
+                                                        </Badge>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="h-4 w-4 text-slate-400"/>
-                                                    <div>
-                                                        <p className="text-xs text-slate-500">Total</p>
-                                                        <p className="font-medium text-amber-400">${booking.totalAmount.toFixed(2)}</p>
+
+                                                <div className="grid md:grid-cols-4 gap-4 mb-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="h-4 w-4 text-slate-400" />
+                                                        <div>
+                                                            <p className="text-xs text-slate-500">Check-in</p>
+                                                            <p className="font-medium text-slate-200">
+                                                                {format(new Date(booking.checkIn), 'MMM dd, yyyy')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-4 w-4 text-slate-400" />
+                                                        <div>
+                                                            <p className="text-xs text-slate-500">Check-out</p>
+                                                            <p className="font-medium text-slate-200">
+                                                                {format(new Date(booking.checkOut), 'MMM dd, yyyy')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4 text-slate-400" />
+                                                        <div>
+                                                            <p className="text-xs text-slate-500">Guests</p>
+                                                            <p className="font-medium text-slate-200">
+                                                                {booking.guests} guest{booking.guests !== 1 ? "s" : ""}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin className="h-4 w-4 text-slate-400" />
+                                                        <div>
+                                                            <p className="text-xs text-slate-500">Total</p>
+                                                            <p className="font-medium text-amber-400">
+                                                                ${booking.totalAmount.toFixed(2)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {booking.specialRequests && (
+                                                    <div className="mb-4">
+                                                        <p className="text-sm text-slate-500 mb-1">Special Requests</p>
+                                                        <p className="text-sm text-slate-300 bg-slate-800/50 p-2 rounded">
+                                                            {booking.specialRequests}
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                <div className="mb-4">
+                                                    <p className="text-xs text-slate-500">Booked on</p>
+                                                    <p className="text-sm text-slate-300">
+                                                        {format(new Date(booking.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
+                                                    </p>
+                                                </div>
+
+                                                <Separator className="my-4 bg-slate-700/50" />
+
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex gap-2">
+                                                        {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
+                                                            <Button
+                                                                onClick={() => handleCancelBooking(booking.id)}
+                                                                variant="outline"
+                                                                size="sm"
+                                                                disabled={cancelBooking.isPending}
+                                                                className="border-red-400/30 text-red-400 hover:bg-red-400/10 hover:border-red-400 bg-transparent transition-all duration-300"
+                                                            >
+                                                                {cancelBooking.isPending ? "Cancelling..." : "Cancel Booking"}
+                                                            </Button>
+                                                        )}
+                                                        <Link href={`/booking/confirmation/${booking.id}`}>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
+                                                            >
+                                                                View Details
+                                                            </Button>
+                                                        </Link>
                                                     </div>
                                                 </div>
                                             </div>
+                                        ))}
 
-                                            {booking.specialRequests && (
-                                                <div className="mb-4">
-                                                    <p className="text-sm text-slate-500 mb-1">Special Requests</p>
-                                                    <p className="text-sm text-slate-300 bg-slate-800/50 p-2 rounded">
-                                                        {booking.specialRequests}
-                                                    </p>
-                                                </div>
-                                            )}
+                                        {/* Pagination */}
+                                        {bookingsData.pagination.totalPages > 1 && (
+                                            <div className="flex justify-center items-center gap-4 mt-8">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                    disabled={currentPage === 1}
+                                                    className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent"
+                                                >
+                                                    Previous
+                                                </Button>
 
-                                            <Separator className="my-4 bg-slate-700/50"/>
+                                                <span className="text-slate-400">
+                                Page {bookingsData.pagination.page} of {bookingsData.pagination.totalPages}
+                            </span>
 
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex gap-2">
-                                                    {booking.status === "CONFIRMED" && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
-                                                        >
-                                                            Modify Booking
-                                                        </Button>
-                                                    )}
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
-                                                    >
-                                                        View Details
-                                                    </Button>
-                                                </div>
-                                                {booking.status === "COMPLETED" && !booking.rating && (
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-light shadow-lg hover:shadow-amber-500/25 transition-all duration-300"
-                                                    >
-                                                        Rate Stay
-                                                    </Button>
-                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(p => Math.min(bookingsData.pagination.totalPages, p + 1))}
+                                                    disabled={currentPage === bookingsData.pagination.totalPages}
+                                                    className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent"
+                                                >
+                                                    Next
+                                                </Button>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>
