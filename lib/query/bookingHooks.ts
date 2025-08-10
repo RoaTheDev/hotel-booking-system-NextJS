@@ -70,27 +70,18 @@ export const useBooking = (bookingId: string) => {
 }
 
 export const useCancelBooking = () => {
-    const queryClient = useQueryClient()
+    const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({bookingId, reason}: { bookingId: number, reason?: string }) => {
-            const response = await axios.patch<ApiResponse<BookingWithDetails>>(
-                `/api/bookings/${bookingId}/status`,
-                {status: 'CANCELLED', reason}, {withCredentials: true}
-            )
-            return response.data.data!
+        mutationFn: async (bookingId: number) => {
+            const response = await axios.delete<ApiResponse<BookingWithDetails>>(`/api/bookings/${bookingId}`);
+            return response.data.data;
         },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: ['bookings']})
-            await queryClient.invalidateQueries({queryKey: ['user-bookings']})
-
-            toast.success('Booking cancelled successfully')
+        onSuccess: async ( bookingId) => {
+            await queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
         },
         onError: (error) => {
-            const errorMessage = error.message || 'Failed to cancel booking'
-            toast.error('Cancellation Failed', {
-                description: errorMessage
-            })
-        }
-    })
-}
+            console.error('Error cancelling booking:', error);
+        },
+    });
+};

@@ -379,7 +379,7 @@ export const ClientRoomPage: FC<RoomData> = ({initialData}) => {
                                                     </div>
                                                     <div className="flex gap-3">
                                                         <Link href={`/rooms/${room.id}`}><Button variant="outline" size="sm" className="border-amber-300/30 text-amber-300 hover:bg-amber-300/10 hover:border-amber-300 font-light bg-transparent transition-all duration-300">View Details</Button></Link>
-                                                        <Link href={`/booking?room=${room.id}`}><Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-slate-900 font-light shadow-lg hover:shadow-teal-500/25 transition-all duration-300 hover:scale-105">Reserve</Button></Link>
+                                                        <Link href={`/booking/${room.id}`}><Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-slate-900 font-light shadow-lg hover:shadow-teal-500/25 transition-all duration-300 hover:scale-105">Reserve</Button></Link>
                                                     </div>
                                                 </div>
                                             </CardContent>

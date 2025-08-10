@@ -37,7 +37,7 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
     const {user} = useAuthStore()
     const createBooking = useCreateBooking()
     const containerRef = useRef<HTMLDivElement>(null)
-
+    const today = new Date().toISOString().split('T')[0]
     const {
         register,
         handleSubmit,
@@ -49,8 +49,8 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
             roomId: parseInt(roomId),
             guests: 1,
             specialRequests: "",
-            checkIn: Date(),
-            checkOut: Date()
+            checkIn: today,
+            checkOut: today
         },
     })
 
@@ -58,7 +58,6 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
     const watchedCheckOut = watch("checkOut")
     const watchedGuests = watch("guests")
 
-    // Calculate total amount when dates change
     useEffect(() => {
         if (watchedCheckIn && watchedCheckOut) {
             const checkInDate = new Date(watchedCheckIn)
@@ -141,7 +140,6 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
             console.error("Booking submission failed:", error);
         }
     };
-    const today = new Date().toISOString().split('T')[0]
 
     return (
         <div ref={containerRef} className="min-h-screen bg-slate-900 text-slate-100 relative overflow-hidden">
@@ -166,8 +164,9 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
                         <ArrowLeft className="h-4 w-4 mr-2"/>
                         Back to Rooms
                     </Button>
-                    <h1 className="text-3xl font-light text-slate-100 mb-2">Complete Your Booking</h1>
-                    <p className="text-slate-400">Reserve your mountain retreat experience</p>
+                    <div className="flex justify-center items-center flex-row ">
+                        <h1 className="text-3xl font-light text-slate-100 mb-2">Complete Your Booking</h1>
+                    </div>
                 </div>
 
                 <div className="grid lg:grid-cols-5 gap-8">
@@ -299,6 +298,7 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
                                                     <Calendar className="h-4 w-4"/>
                                                     Check-in Date
                                                 </Label>
+
                                                 <Input
                                                     type="date"
                                                     min={today}

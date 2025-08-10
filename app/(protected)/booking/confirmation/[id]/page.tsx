@@ -11,13 +11,11 @@ import {ArrowRight, Calendar, CheckCircle, Clock, Download, Mail, MapPin, Phone,
 import {useBooking} from "@/lib/query/bookingHooks"
 import {format} from "date-fns"
 
-
-
 export default function BookingConfirmationPage({params}: { params: Promise<{ id: string }> }) {
-    const { id } = use(params)
+    const {id} = use(params)
     const containerRef = useRef<HTMLDivElement>(null)
     const {data: booking, isLoading, error} = useBooking(id)
-    console.log(id)
+
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.set([".success-animation", ".confirmation-card", ".action-buttons"], {
@@ -30,7 +28,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
 
             const tl = gsap.timeline()
 
-            // Success animation
             tl.to(".success-animation", {
                 opacity: 1,
                 y: 0,
@@ -44,8 +41,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                     duration: 0.8,
                     ease: "back.out(1.7)",
                 }, "-=0.5")
-
-                // Confirmation details
                 .to(".confirmation-card", {
                     opacity: 1,
                     y: 0,
@@ -53,7 +48,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                     duration: 0.8,
                     ease: "power2.out",
                 }, "-=0.4")
-
                 .to(".action-buttons", {
                     opacity: 1,
                     y: 0,
@@ -61,7 +55,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                     duration: 0.6,
                     ease: "power2.out",
                 }, "-=0.2")
-
                 .to(".floating-element", {
                     opacity: 1,
                     scale: 1,
@@ -88,7 +81,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                 ease: "power2.inOut",
                 delay: 1,
             })
-
         }, containerRef)
 
         return () => ctx.revert()
@@ -103,6 +95,10 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
             default:
                 return "bg-slate-500/20 text-slate-400 border-slate-500/30"
         }
+    }
+
+    const handlePrint = () => {
+        window.print()
     }
 
     if (isLoading) {
@@ -127,7 +123,8 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                         </div>
                         <h2 className="text-xl font-medium text-slate-100 mb-2">Booking Not Found</h2>
                         <p className="text-slate-400 mb-6">
-                            {`We couldn't find the booking confirmation you're looking for.`}</p>
+                            {`We couldn't find the booking confirmation you're looking for.`}
+                        </p>
                         <Link href="/profile">
                             <Button
                                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900">
@@ -143,7 +140,7 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
     return (
         <div ref={containerRef} className="min-h-screen bg-slate-900 text-slate-100 relative overflow-hidden">
             {/* Floating background elements */}
-            <div className="fixed inset-0 pointer-events-none">
+            <div className="fixed inset-0 pointer-events-none no-print">
                 <div
                     className="floating-element floating-1 absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full blur-xl"></div>
                 <div
@@ -154,20 +151,152 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
                 {/* Success Header */}
-                <div className="success-animation text-center mb-12">
+                <div className="success-animation text-center mb-12 no-print">
                     <div
                         className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                         <CheckCircle className="check-icon h-12 w-12 text-slate-900"/>
                     </div>
                     <h1 className="text-4xl font-light text-slate-100 mb-4">Booking Confirmed!</h1>
                     <p className="text-xl text-slate-400 max-w-2xl mx-auto">{`
-                        Your mountain retreat reservation has been successfully created.
-                        We can't wait to welcome you to Tranquility Inn.
-                    `}</p>
+Your mountain retreat reservation has been successfully created.
+    We can't wait to welcome you to Tranquility Inn.
+    `}</p>
                 </div>
 
-                {/* Booking Details */}
-                <div className="confirmation-card space-y-8">
+                {/* Receipt Section for Printing */}
+                <div className="receipt print-only">
+                    <Card className="border-0 shadow-lg bg-white text-black">
+                        <CardHeader className="text-center">
+                            <h2 className="text-2xl font-semibold">Tranquility Inn - Booking Receipt</h2>
+                            <p className="text-gray-600">Booking #{booking.id}</p>
+                            <Badge className={`${getStatusColor(booking.status)} border mt-2`}>
+                                {booking.status}
+                            </Badge>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div>
+                                <h3 className="text-lg font-medium flex items-center gap-2">
+                                    <MapPin className="h-5 w-5 text-gray-700"/>
+                                    Room Details
+                                </h3>
+                                <div className="bg-gray-100 rounded-lg p-4 space-y-2">
+                                    <div className="flex justify-between">
+                                        <div>
+                                            <h4 className="text-lg font-medium">{booking.room.roomType.name}</h4>
+                                            <p className="text-gray-600">Room {booking.room.roomNumber}</p>
+                                        </div>
+                                        <p className="text-lg font-medium text-gray-700">
+                                            ${booking.room.roomType.basePrice}/night
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                        <Users className="h-4 w-4"/>
+                                        <span>Accommodates up to {booking.guests} guests</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Separator className="bg-gray-300"/>
+
+                            <div>
+                                <h3 className="text-lg font-medium flex items-center gap-2">
+                                    <Calendar className="h-5 w-5 text-gray-700"/>
+                                    Stay Information
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="bg-gray-100 rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Calendar className="h-4 w-4 text-blue-600"/>
+                                            <span className="font-medium">Check-in</span>
+                                        </div>
+                                        <p className="text-lg font-light">
+                                            {format(new Date(booking.checkIn), 'MMM dd, yyyy')}
+                                        </p>
+                                        <p className="text-gray-600 text-sm">After 3:00 PM</p>
+                                    </div>
+                                    <div className="bg-gray-100 rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Clock className="h-4 w-4 text-red-600"/>
+                                            <span className="font-medium">Check-out</span>
+                                        </div>
+                                        <p className="text-lg font-light">
+                                            {format(new Date(booking.checkOut), 'MMM dd, yyyy')}
+                                        </p>
+                                        <p className="text-gray-600 text-sm">Before 11:00 AM</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Separator className="bg-gray-300"/>
+
+                            <div>
+                                <h3 className="text-lg font-medium flex items-center gap-2">
+                                    <Users className="h-5 w-5 text-gray-700"/>
+                                    Guest Information
+                                </h3>
+                                <div className="bg-gray-100 rounded-lg p-4 space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Primary Guest</span>
+                                        <span>{booking.user.firstName} {booking.user.lastName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Email</span>
+                                        <span>{booking.user.email}</span>
+                                    </div>
+                                    {booking.user.phone && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Phone</span>
+                                            <span>{booking.user.phone}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Number of Guests</span>
+                                        <span>{booking.guests} guest{booking.guests !== 1 ? 's' : ''}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {booking.specialRequests && (
+                                <>
+                                    <Separator className="bg-gray-300"/>
+                                    <div>
+                                        <h3 className="text-lg font-medium">Special Requests</h3>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <p className="text-gray-600">{booking.specialRequests}</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            <Separator className="bg-gray-300"/>
+
+                            <div>
+                                <h3 className="text-lg font-medium">Pricing Breakdown</h3>
+                                <div className="bg-gray-100 rounded-lg p-4 space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">
+                                            ${booking.room.roomType.basePrice}/night × {
+                                            Math.ceil(
+                                                (new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) /
+                                                (1000 * 60 * 60 * 24)
+                                            )
+                                        } nights
+                                        </span>
+                                        <span>${booking.totalAmount}</span>
+                                    </div>
+                                    <Separator className="bg-gray-300"/>
+                                    <div className="flex justify-between text-lg font-medium">
+                                        <span>Total Amount</span>
+                                        <span className="text-blue-600">${booking.totalAmount}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Full Page Content */}
+                <div className="confirmation-card space-y-8 no-print">
                     <Card className="border-0 shadow-2xl bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
                         <CardHeader className="text-center">
                             <div className="flex items-center justify-center gap-3 mb-2">
@@ -183,7 +312,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                             </p>
                         </CardHeader>
                         <CardContent className="space-y-8">
-                            {/* Room Information */}
                             <div>
                                 <h3 className="text-lg font-medium text-slate-100 mb-4 flex items-center gap-2">
                                     <MapPin className="h-5 w-5 text-amber-500"/>
@@ -201,7 +329,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                                             </p>
                                         </div>
                                     </div>
-
                                     <div className="flex items-center gap-2 text-slate-300">
                                         <Users className="h-4 w-4 text-slate-400"/>
                                         <span>Accommodates up to {booking.guests} guests</span>
@@ -211,7 +338,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
 
                             <Separator className="bg-slate-700/50"/>
 
-                            {/* Stay Information */}
                             <div>
                                 <h3 className="text-lg font-medium text-slate-100 mb-4 flex items-center gap-2">
                                     <Calendar className="h-5 w-5 text-amber-500"/>
@@ -228,7 +354,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                                         </p>
                                         <p className="text-slate-400 text-sm">After 3:00 PM</p>
                                     </div>
-
                                     <div className="bg-slate-700/30 rounded-lg p-6">
                                         <div className="flex items-center gap-3 mb-2">
                                             <Clock className="h-5 w-5 text-red-400"/>
@@ -242,7 +367,8 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                                 </div>
                             </div>
 
-                            {/* Guest Information */}
+                            <Separator className="bg-slate-700/50"/>
+
                             <div>
                                 <h3 className="text-lg font-medium text-slate-100 mb-4 flex items-center gap-2">
                                     <Users className="h-5 w-5 text-amber-500"/>
@@ -274,7 +400,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                                 </div>
                             </div>
 
-                            {/* Special Requests */}
                             {booking.specialRequests && (
                                 <div>
                                     <h3 className="text-lg font-medium text-slate-100 mb-4">Special Requests</h3>
@@ -286,7 +411,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
 
                             <Separator className="bg-slate-700/50"/>
 
-                            {/* Pricing Breakdown */}
                             <div>
                                 <h3 className="text-lg font-medium text-slate-100 mb-4">Pricing Breakdown</h3>
                                 <div className="bg-slate-700/30 rounded-lg p-6 space-y-3">
@@ -311,16 +435,15 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                         </CardContent>
                     </Card>
 
-                    {/* Action Buttons */}
                     <div className="action-buttons space-y-4">
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button
-                                onClick={() => window.print()}
+                                onClick={handlePrint}
                                 variant="outline"
                                 className="flex items-center gap-2 border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
                             >
                                 <Download className="h-4 w-4"/>
-                                Save Confirmation
+                                Print Receipt
                             </Button>
 
                             <Link href="/profile">
@@ -342,38 +465,61 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
                         </div>
                     </div>
 
-                    {/* Additional Information */}
                     <Card
                         className="border-0 shadow-lg bg-gradient-to-br from-slate-800/30 to-slate-700/30 backdrop-blur-xl border-slate-600/30">
                         <CardContent className="p-6">
                             <h3 className="text-lg font-medium text-slate-100 mb-4 flex items-center gap-2">
                                 <Star className="h-5 w-5 text-amber-500"/>
                                 {`What's`} Next?
-                            </h3>
-                            <div className="space-y-3 text-slate-300">
-                                <p className="flex items-start gap-3">
-                                    <Mail className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0"/>
-                                    <span className="text-sm">
+</h3>
+<div className="space-y-3 text-slate-300">
+    <p className="flex items-start gap-3">
+        <Mail className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0"/>
+        <span className="text-sm">
                                         {`You'll`} receive a confirmation email with detailed check-in instructions within the next few minutes.
                                     </span>
-                                </p>
-                                <p className="flex items-start gap-3">
-                                    <Phone className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0"/>
-                                    <span className="text-sm">
+    </p>
+    <p className="flex items-start gap-3">
+        <Phone className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0"/>
+        <span className="text-sm">
                                         Our team will contact you 24 hours before your arrival to confirm your check-in details.
                                     </span>
-                                </p>
-                                <p className="flex items-start gap-3">
-                                    <Calendar className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0"/>
-                                    <span className="text-sm">
+    </p>
+    <p className="flex items-start gap-3">
+        <Calendar className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0"/>
+        <span className="text-sm">
                                         You can modify or cancel your booking up to 24 hours before check-in from your profile page.
                                     </span>
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </div>
-    )
+    </p>
+</div>
+</CardContent>
+</Card>
+</div>
+</div>
+
+<style jsx>{`
+                @media print {
+                    .no-print {
+                        display: none !important;
+                    }
+                    .print-only {
+                        display: block !important;
+                    }
+                    .receipt {
+                        width: 100%;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background: white;
+                        color: black;
+                    }
+                    body {
+                        background: white !important;
+                    }
+                }
+                .print-only {
+                    display: none;
+                }
+            `}</style>
+</div>
+)
 }

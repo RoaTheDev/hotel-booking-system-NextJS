@@ -139,7 +139,6 @@ export const GET = async (req: NextRequest) => {
                     phone: true
                 }
             }),
-            // Fetch all active rooms
             prisma.room.findMany({
                 where: {
                     isActive: true,
@@ -250,7 +249,10 @@ export const POST = async (req: NextRequest) => {
             }, {status: HttpStatusCode.BadRequest});
         }
 
-        if (checkInDate < new Date()) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (checkInDate < today) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Check-in date cannot be in the past",
@@ -258,7 +260,6 @@ export const POST = async (req: NextRequest) => {
                 errors: {type: "ValidationError"},
             }, {status: HttpStatusCode.BadRequest});
         }
-
         // Fetch the room details
         const room = await prisma.room.findFirst({
             where: {

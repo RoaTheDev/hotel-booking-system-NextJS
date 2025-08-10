@@ -31,7 +31,7 @@ export const ClientProfilePage = () => {
     const [bookingStatus, setBookingStatus] = useState<string>("ALL")
     const [currentPage, setCurrentPage] = useState(1)
 
-    const { data: bookingsData, isLoading: bookingsLoading } = useUserBookings({
+    const {data: bookingsData, isLoading: bookingsLoading} = useUserBookings({
         page: currentPage,
         limit: 10,
         status: bookingStatus
@@ -41,10 +41,7 @@ export const ClientProfilePage = () => {
 
     const handleCancelBooking = async (bookingId: number) => {
         if (window.confirm("Are you sure you want to cancel this booking?")) {
-            await cancelBooking.mutateAsync({
-                bookingId,
-                reason: "Cancelled by guest"
-            })
+            await cancelBooking.mutateAsync(bookingId)
         }
     }
     const {user, isAuthenticated, isHydrated, updateProfile} = useAuthStore()
@@ -459,7 +456,8 @@ export const ClientProfilePage = () => {
                         <Card className="border-0 shadow-2xl bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
                             <CardHeader>
                                 <div className="flex justify-between items-center">
-                                    <CardTitle className="text-2xl font-light text-slate-100">Booking History</CardTitle>
+                                    <CardTitle className="text-2xl font-light text-slate-100">Booking
+                                        History</CardTitle>
 
                                     {/* Status Filter */}
                                     <div className="flex gap-2">
@@ -487,13 +485,15 @@ export const ClientProfilePage = () => {
                             <CardContent>
                                 {bookingsLoading ? (
                                     <div className="text-center py-8">
-                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                                        <div
+                                            className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
                                         <p className="text-slate-400">Loading your bookings...</p>
                                     </div>
                                 ) : !bookingsData?.bookings.length ? (
                                     <div className="text-center py-12">
-                                        <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <Calendar className="h-8 w-8 text-slate-400" />
+                                        <div
+                                            className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Calendar className="h-8 w-8 text-slate-400"/>
                                         </div>
                                         <h3 className="text-lg font-medium text-slate-100 mb-2">No Bookings Found</h3>
                                         <p className="text-slate-400 mb-6">
@@ -503,7 +503,8 @@ export const ClientProfilePage = () => {
                                             }
                                         </p>
                                         <Link href="/">
-                                            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900">
+                                            <Button
+                                                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900">
                                                 Browse Rooms
                                             </Button>
                                         </Link>
@@ -533,7 +534,7 @@ export const ClientProfilePage = () => {
 
                                                 <div className="grid md:grid-cols-4 gap-4 mb-4">
                                                     <div className="flex items-center gap-2">
-                                                        <Calendar className="h-4 w-4 text-slate-400" />
+                                                        <Calendar className="h-4 w-4 text-slate-400"/>
                                                         <div>
                                                             <p className="text-xs text-slate-500">Check-in</p>
                                                             <p className="font-medium text-slate-200">
@@ -542,7 +543,7 @@ export const ClientProfilePage = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <Clock className="h-4 w-4 text-slate-400" />
+                                                        <Clock className="h-4 w-4 text-slate-400"/>
                                                         <div>
                                                             <p className="text-xs text-slate-500">Check-out</p>
                                                             <p className="font-medium text-slate-200">
@@ -551,7 +552,7 @@ export const ClientProfilePage = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4 text-slate-400" />
+                                                        <User className="h-4 w-4 text-slate-400"/>
                                                         <div>
                                                             <p className="text-xs text-slate-500">Guests</p>
                                                             <p className="font-medium text-slate-200">
@@ -560,7 +561,7 @@ export const ClientProfilePage = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <MapPin className="h-4 w-4 text-slate-400" />
+                                                        <MapPin className="h-4 w-4 text-slate-400"/>
                                                         <div>
                                                             <p className="text-xs text-slate-500">Total</p>
                                                             <p className="font-medium text-amber-400">
@@ -586,7 +587,7 @@ export const ClientProfilePage = () => {
                                                     </p>
                                                 </div>
 
-                                                <Separator className="my-4 bg-slate-700/50" />
+                                                <Separator className="my-4 bg-slate-700/50"/>
 
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex gap-2">
@@ -656,41 +657,6 @@ export const ClientProfilePage = () => {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="space-y-4">
-                                    <div
-                                        className="flex justify-between items-center p-4 border border-slate-700/50 rounded-lg bg-slate-700/20 hover:bg-slate-700/30 transition-all duration-300">
-                                        <div>
-                                            <h3 className="font-medium text-slate-100">Email Notifications</h3>
-                                            <p className="text-sm text-slate-400">
-                                                Receive booking confirmations and mountain retreat updates
-                                            </p>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
-
-                                        >
-                                            Configure
-                                        </Button>
-                                    </div>
-
-                                    <div
-                                        className="flex justify-between items-center p-4 border border-slate-700/50 rounded-lg bg-slate-700/20 hover:bg-slate-700/30 transition-all duration-300">
-                                        <div>
-                                            <h3 className="font-medium text-slate-100">Privacy Settings</h3>
-                                            <p className="text-sm text-slate-400">Manage your data and privacy
-                                                preferences</p>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
-
-                                        >
-                                            Manage
-                                        </Button>
-                                    </div>
-
                                     <div
                                         className="flex justify-between items-center p-4 border border-slate-700/50 rounded-lg bg-slate-700/20 hover:bg-slate-700/30 transition-all duration-300">
                                         <div>

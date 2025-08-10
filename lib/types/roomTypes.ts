@@ -27,13 +27,18 @@ export const UpdateRoomAvailabilitySchema = z.object({
 
 // Booking Types
 export const CreateBookingSchema = z.object({
-    roomId: z.number().int().positive(),
-    checkIn: z.string().datetime(),
-    checkOut: z.string().datetime(),
-    guests: z.number().int().positive(),
+    roomId: z.number().positive(),
+    guests: z.number().min(1).max(10),
     specialRequests: z.string().optional(),
+    checkIn: z.string().date(),
+    checkOut: z.string().date(),
+}).refine((data) => new Date(data.checkOut) > new Date(data.checkIn), {
+    message: "Check-out date must be after check-in date",
+    path: ["checkOut"],
+}).refine((data) => new Date(data.checkIn) >= new Date(new Date().toISOString().split('T')[0]), {
+    message: "Check-in date must be today or later",
+    path: ["checkIn"],
 });
-
 export const UpdateBookingStatusSchema = z.object({
     status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]),
 });
