@@ -3,10 +3,10 @@ import { prismaClient as prisma } from "@/lib/prismaClient";
 import { HttpStatusCode } from "axios";
 import { ZodError } from "zod";
 import { z } from "zod";
-import { ApiErrorResponse, ApiResponse } from "@/lib/types/commonTypes";
-import { validationErrorFormat } from "@/lib/zodErrorFormat";
-import { requireAdminAuth, AuthError } from "@/lib/middleware/auth";
-import {RouteParams} from "@/lib/types/roomTypes";
+import { ApiErrorResponse, ApiResponse } from "@/types/commonTypes";
+import { validationErrorFormat } from "@/utils/zodErrorFormat";
+import { requireAdminAuth, AuthError } from "@/middleware/auth";
+import {RouteParams} from "@/types/roomTypes";
 
 const RoomImageSchema = z.object({
     imageUrl: z.string().url("Invalid image URL"),

@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from "next/server";
-import {ResetPassword} from "@/lib/types/authTypes";
+import {ResetPassword} from "@/types/authTypes";
 import {prismaClient} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {hashPassword} from "@/lib/jwt";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {hashPassword} from "@/utils/jwt";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
 
 export const POST = async (request: NextRequest, {params}: { params: { id: string } }) => {
 

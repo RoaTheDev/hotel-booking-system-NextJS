@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {AuthError, requireAdminAuth} from "@/lib/middleware/auth";
-import {AdminDashboardStats, BookingWithDetails} from "@/lib/types/roomTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
+import {AdminDashboardStats, BookingWithDetails} from "@/types/roomTypes";
 
 export const GET = async (req: NextRequest) => {
     try {

@@ -11,11 +11,11 @@ import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {Eye, EyeOff} from "lucide-react"
-import {SignupFormData, SignupFormSchema} from "@/lib/types/authTypes";
-import {useSignup} from "@/lib/query/authHooks";
+import {SignupFormData, SignupFormSchema} from "@/types/authTypes";
+import {useSignup} from "@/hooks/authHooks";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {Modal} from "@/components/Modal";
+import {Modal} from "@/components/common/Modal";
 
 export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false)

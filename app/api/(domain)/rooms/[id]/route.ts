@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {CreateRoomSchema, RoomWithDetails, UpdateRoomAvailabilitySchema} from "@/lib/types/roomTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {CreateRoomSchema, RoomWithDetails, UpdateRoomAvailabilitySchema} from "@/types/roomTypes";
 import {ZodError} from "zod";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {requireAdminAuth} from "@/lib/middleware/auth";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
+import {requireAdminAuth} from "@/middleware/auth";
 
 interface RouteParams {
     params: { id: string };

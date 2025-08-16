@@ -5,8 +5,8 @@ import {
     ServerSignupFromData,
     SignupResponse,
     UserType
-} from "@/lib/types/authTypes";
-import {ApiResponse} from "@/lib/types/commonTypes";
+} from "@/types/authTypes";
+import {ApiResponse} from "@/types/commonTypes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 

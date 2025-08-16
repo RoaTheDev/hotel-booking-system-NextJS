@@ -1,5 +1,5 @@
 import { ClientRoomPage } from "@/app/(additional-info)/rooms/clientRoomPage";
-import {RoomWithDetails} from "@/lib/types/roomTypes";
+import {RoomWithDetails} from "@/types/roomTypes";
 
 
 export interface Pagination {
@@ -41,6 +41,5 @@ async function fetchInitialRooms(): Promise<RoomResponse> {
 export  default async function RoomsPage() {
 
     const initialData =await fetchInitialRooms();
-    console.log(initialData)
     return <ClientRoomPage initialData={initialData} />;
 }

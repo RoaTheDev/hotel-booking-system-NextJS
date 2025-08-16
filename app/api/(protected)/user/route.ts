@@ -1,9 +1,9 @@
-import {getTokenFromCookie, verifyToken} from "@/lib/jwt";
+import {getTokenFromCookie, verifyToken} from "@/utils/jwt";
 import {NextRequest, NextResponse} from "next/server";
 import {HttpStatusCode} from "axios";
 import {prismaClient} from "@/lib/prismaClient";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {profileSchema, UserType} from "@/lib/types/authTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {profileSchema, UserType} from "@/types/authTypes";
 
 export const GET = async (request: NextRequest) => {
     try {

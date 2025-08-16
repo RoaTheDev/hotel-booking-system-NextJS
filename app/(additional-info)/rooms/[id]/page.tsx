@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import axios from "axios";
-import { RoomWithDetails } from "@/lib/types/roomTypes";
+import { RoomWithDetails } from "@/types/roomTypes";
 import ClientRoomDetail from "./clientRoomDetailPage";
 
 async function fetchRoom(roomId: string): Promise<RoomWithDetails> {

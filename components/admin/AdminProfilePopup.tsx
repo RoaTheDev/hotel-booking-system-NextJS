@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {User, Save, X, LogOut, Edit} from "lucide-react"
-import { ProfileForm, profileSchema } from "@/lib/types/authTypes"
-import { useAuthStore } from "@/lib/stores/AuthStore"
+import { ProfileForm, profileSchema } from "@/types/authTypes"
+import { useAuthStore } from "@/stores/AuthStore"
 import { toast } from "sonner"
 
 export const AdminProfilePopup = () => {

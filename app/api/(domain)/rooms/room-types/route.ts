@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
 import {RoomType} from "@/app/generated/prisma/client";
 import {ZodError} from "zod";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {AuthError, requireAdminAuth} from "@/lib/middleware/auth";
-import {CreateRoomTypeData, RoomTypeSchema} from "@/lib/types/roomTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
+import {CreateRoomTypeData, RoomTypeSchema} from "@/types/roomTypes";
 
 export const GET = async (req: NextRequest) => {
     try {

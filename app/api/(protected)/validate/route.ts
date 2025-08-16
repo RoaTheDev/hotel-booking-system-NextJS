@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {getTokenFromCookie, verifyToken} from "@/lib/jwt";
+import {getTokenFromCookie, verifyToken} from "@/utils/jwt";
 import {HttpStatusCode} from "axios";
 
 export const GET = async (request: NextRequest) => {

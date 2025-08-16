@@ -8,15 +8,15 @@ import {
     signupApi,
     updateProfileApi,
     ValidateSession,
-} from "@/lib/data/authApi";
+} from "@/data/authApi";
 import {
     ForgetPasswordResponse,
     LoginResponse,
     ServerSignupFromData,
     SignupResponse,
     UserType,
-} from "@/lib/types/authTypes";
-import {ApiResponse} from "@/lib/types/commonTypes";
+} from "@/types/authTypes";
+import {ApiResponse} from "@/types/commonTypes";
 import axios, {HttpStatusCode} from "axios";
 import _ from "lodash";
 

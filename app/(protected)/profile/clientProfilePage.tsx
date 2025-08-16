@@ -13,13 +13,13 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Badge} from "@/components/ui/badge"
 import {Separator} from "@/components/ui/separator"
 import {Calendar, Clock, Edit, LogOut, MapPin, Save, Settings, User, X} from "lucide-react"
-import {useAuthStore} from "@/lib/stores/AuthStore"
-import {ProfileForm, profileSchema} from "@/lib/types/authTypes"
+import {useAuthStore} from "@/stores/AuthStore"
+import {ProfileForm, profileSchema} from "@/types/authTypes"
 import {ProfileLoadingSkeleton} from "@/components/skeleton/profileLoadingSkeleton";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {useLogout} from "@/lib/query/authHooks";
-import {useCancelBooking, useUserBookings} from "@/lib/query/bookingHooks";
+import {useLogout} from "@/hooks/authHooks";
+import {useCancelBooking, useUserBookings} from "@/hooks/bookingHooks";
 import {format} from "date-fns";
 
 

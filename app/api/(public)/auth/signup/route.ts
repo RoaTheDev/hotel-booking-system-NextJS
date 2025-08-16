@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from "next/server";
-import {ServerSignupFromData, ServerSignupSchema, SignupResponse} from "@/lib/types/authTypes";
+import {ServerSignupFromData, ServerSignupSchema, SignupResponse} from "@/types/authTypes";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {generateToken, hashPassword} from "@/lib/jwt";
-import {ValidationError} from "@/lib/types/error";
+import {generateToken, hashPassword} from "@/utils/jwt";
+import {ValidationError} from "@/types/error";
 import {ZodError} from "zod";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
 
 export const POST = async (req: NextRequest) => {
 

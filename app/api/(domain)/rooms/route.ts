@@ -2,13 +2,13 @@ import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {ExtendedCreateRoomSchema, RoomQuerySchema, RoomWithDetails} from "@/lib/types/roomTypes";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {ExtendedCreateRoomSchema, RoomQuerySchema, RoomWithDetails} from "@/types/roomTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
 import {Prisma} from "@/app/generated/prisma";
 import RoomOrderByWithRelationInput = Prisma.RoomOrderByWithRelationInput;
 import RoomWhereInput = Prisma.RoomWhereInput;
-import { requireAdminAuth } from "@/lib/middleware/auth";
+import { requireAdminAuth } from "@/middleware/auth";
 
 
 type RoomViaWhereInput = RoomWhereInput;
@@ -200,7 +200,7 @@ export const GET = async (req: NextRequest) => {
         if (err instanceof ZodError) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
-                message: "Invalid query parameters",
+                message: "Invalid hooks parameters",
                 data: null,
                 errors: validationErrorFormat(err),
             }, { status: HttpStatusCode.BadRequest });

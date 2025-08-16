@@ -1,6 +1,6 @@
 // lib/middleware/auth.ts
 import {NextRequest} from "next/server";
-import {verifyToken} from "@/lib/jwt";
+import {verifyToken} from "@/utils/jwt";
 import {$Enums} from "@/app/generated/prisma";
 import Role = $Enums.Role;
 

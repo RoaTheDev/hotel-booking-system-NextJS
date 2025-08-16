@@ -121,6 +121,7 @@ export interface BookingWithDetails {
     room: {
         id: number;
         roomNumber: string;
+        floor: number | null;
         roomType: {
             name: string;
             basePrice: number;

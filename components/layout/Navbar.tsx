@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button"
 import {useEffect, useState} from "react"
 import {usePathname} from "next/navigation"
 import {Menu, X} from "lucide-react"
-import {useAuthStore} from "@/lib/stores/AuthStore";
+import {useAuthStore} from "@/stores/AuthStore";
 
 export function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -51,7 +51,7 @@ export function Navbar() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between  items-center h-16 sm:h-20">
                     {/* Logo */}
-                    <Link href={'/'} className="flex-shrink-0">
+                    <Link href={'/public'} className="flex-shrink-0">
                         <div className="flex items-center">
                             <div
                                 className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-sm flex items-center justify-center mr-3 sm:mr-4 shadow-lg">

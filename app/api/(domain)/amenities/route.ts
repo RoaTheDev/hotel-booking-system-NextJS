@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
 import {Amenity} from "@/app/generated/prisma";
 
 export const GET = async (req: NextRequest) => {

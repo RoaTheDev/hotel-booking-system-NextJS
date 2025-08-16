@@ -8,7 +8,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
 import {Separator} from "@/components/ui/separator"
 import {ArrowRight, Calendar, CheckCircle, Clock, Download, Mail, MapPin, Phone, Star, Users} from "lucide-react"
-import {useBooking} from "@/lib/query/bookingHooks"
+import {useBooking} from "@/hooks/bookingHooks"
 import {format} from "date-fns"
 
 export default function BookingConfirmationPage({params}: { params: Promise<{ id: string }> }) {

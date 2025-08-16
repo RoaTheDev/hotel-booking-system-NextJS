@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RoomWithDetails } from "@/lib/types/roomTypes";
+import { RoomWithDetails } from "@/types/roomTypes";
 
 gsap.registerPlugin(ScrollTrigger);
 

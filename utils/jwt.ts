@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import {AppJwtPayload} from "@/lib/types/authTypes";
+import {AppJwtPayload} from "@/types/authTypes";
 import {NextRequest} from "next/server";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;

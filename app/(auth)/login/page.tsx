@@ -12,11 +12,11 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Input} from "@/components/ui/input";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Eye, EyeOff} from "lucide-react";
-import {LoginFormData, LoginFormSchema} from "@/lib/types/authTypes";
-import {useLogin} from "@/lib/query/authHooks";
-import {Modal} from "@/components/Modal";
+import {LoginFormData, LoginFormSchema} from "@/types/authTypes";
+import {useLogin} from "@/hooks/authHooks";
+import {Modal} from "@/components/common/Modal";
 import {toast} from "sonner";
-import {useAuthStore} from "@/lib/stores/AuthStore";
+import {useAuthStore} from "@/stores/AuthStore";
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);

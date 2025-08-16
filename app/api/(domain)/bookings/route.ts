@@ -2,10 +2,10 @@ import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {AuthError, requireAuth} from "@/lib/middleware/auth";
-import {BookingQuerySchema, BookingWithDetails, CreateBookingData, CreateBookingSchema} from "@/lib/types/roomTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
+import {AuthError, requireAuth} from "@/middleware/auth";
+import {BookingQuerySchema, BookingWithDetails, CreateBookingData, CreateBookingSchema} from "@/types/roomTypes";
 import {BookingStatus, Prisma, Role} from "@/app/generated/prisma";
 import BookingWhereInput = Prisma.BookingWhereInput;
 
@@ -215,7 +215,7 @@ export const GET = async (req: NextRequest) => {
         if (err instanceof ZodError) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
-                message: "Invalid query parameters",
+                message: "Invalid hooks parameters",
                 data: null,
                 errors: validationErrorFormat(err),
             }, {status: HttpStatusCode.BadRequest});
@@ -365,15 +365,14 @@ export const POST = async (req: NextRequest) => {
             }
         });
 
-        // Format the new booking data to ensure Decimal fields are converted to numbers
         const formatBookingData = {
             ...newBooking,
-            totalAmount: newBooking.totalAmount.toNumber(),  // Convert totalAmount to number
+            totalAmount: newBooking.totalAmount.toNumber(),
             room: {
                 ...newBooking.room,
                 roomType: {
                     ...newBooking.room.roomType,
-                    basePrice: newBooking.room.roomType.basePrice.toNumber(),  // Convert basePrice to number
+                    basePrice: newBooking.room.roomType.basePrice.toNumber(),
                 },
             },
         };

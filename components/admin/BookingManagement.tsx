@@ -21,7 +21,7 @@ import {
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
 import axios from "axios"
 import {z} from "zod"
-import {BookingWithDetails} from "@/lib/types/roomTypes"
+import {BookingWithDetails} from "@/types/roomTypes"
 import {toast} from "sonner"
 import {BookingStatusUpdateType} from "@/app/api/(domain)/bookings/[id]/route"
 import {BookingStatus} from "@/app/generated/prisma"

@@ -1,41 +1,34 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {AuthError, requireAdminAuth} from "@/lib/middleware/auth";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
 import {Prisma, Role} from "@/app/generated/prisma";
 import bcrypt from "bcryptjs";
 import {z} from "zod";
-interface UpdateUserRequest {
+
+export interface UpdateUserRequest {
     email?: string;
     passwordHash?: string;
     firstName?: string;
     lastName?: string;
-    phone?: string | null;
+    phone?: string;
     role?: Role;
     isDeleted?: boolean;
 }
+
 const updateUserSchema = z.object({
     email: z.string().email("Invalid email format").max(255, "Email too long").optional(),
     password: z.string().min(6, "Password must be at least 6 characters").max(100, "Password too long").optional(),
     firstName: z.string().min(1, "First name is required").max(100, "First name too long").optional(),
     lastName: z.string().min(1, "Last name is required").max(100, "Last name too long").optional(),
-    phone: z.string().max(20, "Phone number too long").nullable().optional(),
+    phone: z.string().max(20, "Phone number too long").optional(),
     role: z.enum([Role.STAFF, Role.ADMIN], {
         errorMap: () => ({message: "Role must be STAFF or ADMIN"})
     }).optional(),
     isDeleted: z.boolean().optional()
 });
 
-interface UpdateUserRequest {
-    email?: string;
-    password?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string | null;
-    role?: Role;
-    isDeleted?: boolean;
-}
 
 interface UpdatedUser {
     id: number;
@@ -129,7 +122,6 @@ export const PUT = async (req: NextRequest, {params}: { params: { id: string } }
         if (updateData.password) {
             const saltRounds = 12;
             dataToUpdate.passwordHash = await bcrypt.hash(updateData.password, saltRounds);
-            delete dataToUpdate.password;
         }
 
         const updatedUser = await prisma.user.update({

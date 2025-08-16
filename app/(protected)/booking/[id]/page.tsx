@@ -2,12 +2,12 @@
 
 import {use, useEffect} from "react"
 import {useRouter} from "next/navigation"
-import {useAuthStore} from "@/lib/stores/AuthStore"
+import {useAuthStore} from "@/stores/AuthStore"
 import {Card, CardContent} from "@/components/ui/card"
 import {Button} from "@/components/ui/button"
 import Link from "next/link"
 import {User} from "lucide-react"
-import {BookingForm} from "@/components/BookingForm";
+import {BookingForm} from "@/components/users/BookingForm";
 
 const mockRooms = [
     {

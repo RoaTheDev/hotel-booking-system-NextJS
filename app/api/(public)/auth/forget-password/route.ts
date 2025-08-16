@@ -1,10 +1,10 @@
 import {NextRequest, NextResponse} from "next/server";
-import {ForgetPassword, ForgetPasswordResponse} from "@/lib/types/authTypes";
+import {ForgetPassword, ForgetPasswordResponse} from "@/types/authTypes";
 import {prismaClient} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
 import {v4} from "uuid";
-import {generateOTP} from "@/lib/otpGenerator";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {generateOTP} from "@/utils/otpGenerator";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
 
 export const POST = async (request: NextRequest) => {
 

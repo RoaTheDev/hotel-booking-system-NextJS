@@ -1,5 +1,4 @@
 'use client'
-
 import React, {JSX, useRef} from "react"
 import {
     Area,
@@ -15,36 +14,22 @@ import {
     XAxis,
     YAxis
 } from "recharts"
-import {
-    Activity,
-    Calendar,
-    Clock,
-    DollarSign,
-    Edit,
-    Home,
-    Plus,
-    Settings,
-    Star,
-    Trash2,
-    TrendingUp,
-    Users
-} from "lucide-react"
+import {Activity, Calendar, Clock, DollarSign, Home, Settings, Star, TrendingUp, User2Icon, Users} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Badge} from "@/components/ui/badge"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent} from "@/components/ui/chart"
-import {AdminProfilePopup} from "@/components/AdminProfilePopup"
+import {AdminProfilePopup} from "@/components/admin/AdminProfilePopup"
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns"
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider"
 import {useQuery} from "@tanstack/react-query"
 import axios from "axios"
-import {AdminDashboardStats, BookingWithDetails} from "@/lib/types/roomTypes"
-import {BookingManagement} from "@/components/BookingManagement";
+import {AdminDashboardStats, BookingWithDetails} from "@/types/roomTypes"
+import {BookingManagement} from "@/components/admin/BookingManagement"
+import {UserManagement} from "@/components/admin/UserManagement"
+import {RoomManagement} from "@/components/admin/RoomManagement"
+import {GuestManagement} from "@/components/admin/GuestManagement";
 
 interface RevenueData {
     month: string;
@@ -67,8 +52,6 @@ interface DailyBookingsData {
     checkouts: number;
 }
 
-
-
 interface Booking {
     id: number;
     guest: string;
@@ -78,7 +61,6 @@ interface Booking {
     status: "CONFIRMED" | "PENDING" | "COMPLETED" | "CANCELLED";
     amount: number;
 }
-
 
 type ChartConfig = {
     [key: string]: {
@@ -170,32 +152,6 @@ export default function EnhancedAdminDashboard(): JSX.Element {
         {day: 'Sat', bookings: 35, checkins: 22, checkouts: 19},
         {day: 'Sun', bookings: 31, checkins: 20, checkouts: 16}
     ]
-
-    const getStatusColor = (status: string): string => {
-        switch (status.toLowerCase()) {
-            case "confirmed":
-                return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-            case "pending":
-                return "bg-amber-500/20 text-amber-400 border-amber-500/30"
-            case "cancelled":
-                return "bg-red-500/20 text-red-400 border-red-500/30"
-            case "completed":
-                return "bg-blue-500/20 text-blue-400 border-blue-500/30"
-            case "available":
-                return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-            case "occupied":
-                return "bg-blue-500/20 text-blue-400 border-blue-500/30"
-            case "maintenance":
-                return "bg-orange-500/20 text-orange-400 border-orange-500/30"
-            case "active":
-                return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-            default:
-                return "bg-slate-500/20 text-slate-400 border-slate-500/30"
-        }
-    }
-
-
-
 
     if (isLoading) {
         return (
@@ -363,20 +319,21 @@ export default function EnhancedAdminDashboard(): JSX.Element {
                                 <Calendar className="h-4 w-4"/>
                                 Bookings
                             </TabsTrigger>
-                            <TabsTrigger value="users"
-                                         className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-slate-900">
+
+                            <TabsTrigger value="clients"
+                                         className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-slate-900">
                                 <Users className="h-4 w-4"/>
-                                Users
+                                Clients
                             </TabsTrigger>
                             <TabsTrigger value="rooms"
                                          className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-slate-900">
                                 <Home className="h-4 w-4"/>
                                 Rooms
                             </TabsTrigger>
-                            <TabsTrigger value="settings"
-                                         className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-slate-900">
-                                <Settings className="h-4 w-4"/>
-                                Settings
+                            <TabsTrigger value="users"
+                                         className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-slate-900">
+                                <User2Icon className="h-4 w-4"/>
+                                Users
                             </TabsTrigger>
                         </TabsList>
 
@@ -450,7 +407,7 @@ export default function EnhancedAdminDashboard(): JSX.Element {
                                 </div>
 
                                 {/* Room Performance and Daily Activity */}
-                                <div className="grid lg:grid-cols-2 gap-6">
+                                <div className="grid lg-grid-cols-2 gap-6">
                                     <Card
                                         className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
                                         <CardHeader>
@@ -601,221 +558,15 @@ export default function EnhancedAdminDashboard(): JSX.Element {
                         </TabsContent>
 
                         <TabsContent value="users">
-                            <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
-                                <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle className="text-2xl font-light text-slate-100">User
-                                        Management</CardTitle>
-                                    <Button
-                                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
-                                        <Plus className="h-4 w-4"/>
-                                        Add User
-                                    </Button>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="rounded-lg border border-slate-700/50 overflow-hidden">
-                                        <Table>
-                                            <TableHeader className="bg-slate-700/30">
-                                                <TableRow className="border-slate-700/50 hover:bg-slate-700/20">
-                                                    <TableHead className="text-slate-300 font-light">Name</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Email</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Role</TableHead>
-                                                    <TableHead
-                                                        className="text-slate-300 font-light">Bookings</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Status</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Joined</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {dashboardData?.recentBookings.map((booking) => (
-                                                    <TableRow key={booking.user.id}
-                                                              className="border-slate-700/50 hover:bg-slate-700/20 transition-colors duration-200">
-                                                        <TableCell
-                                                            className="font-medium text-slate-200">{`${booking.user.firstName} ${booking.user.lastName}`}</TableCell>
-                                                        <TableCell
-                                                            className="text-slate-300">{booking.user.email}</TableCell>
-                                                        <TableCell>
-                                                            <Badge
-                                                                className={booking.user.id === 1 ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "bg-slate-500/20 text-slate-400 border border-slate-500/30"}>
-                                                                {booking.user.id === 1 ? "ADMIN" : "GUEST"}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-300">{1}</TableCell>
-                                                        <TableCell>
-                                                            <Badge className={getStatusColor("active")}>Active</Badge>
-                                                        </TableCell>
-                                                        <TableCell
-                                                            className="text-slate-300">{new Date().toISOString().split('T')[0]}</TableCell>
-                                                        <TableCell>
-                                                            <div className="flex gap-2">
-                                                                <Button variant="outline" size="sm"
-                                                                        className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300">
-                                                                    <Edit className="h-4 w-4"/>
-                                                                </Button>
-                                                                <Button variant="outline" size="sm"
-                                                                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-400 bg-transparent transition-all duration-300">
-                                                                    <Trash2 className="h-4 w-4"/>
-                                                                </Button>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <UserManagement/>
                         </TabsContent>
 
                         <TabsContent value="rooms">
-                            <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
-                                <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle className="text-2xl font-light text-slate-100">Room
-                                        Management</CardTitle>
-                                    <Button
-                                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
-                                        <Plus className="h-4 w-4"/>
-                                        Add Room
-                                    </Button>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="rounded-lg border border-slate-700/50 overflow-hidden">
-                                        <Table>
-                                            <TableHeader className="bg-slate-700/30">
-                                                <TableRow className="border-slate-700/50 hover:bg-slate-700/20">
-                                                    <TableHead className="text-slate-300 font-light">Room
-                                                        Number</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Type</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Floor</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Status</TableHead>
-                                                    <TableHead
-                                                        className="text-slate-300 font-light">Occupancy</TableHead>
-                                                    <TableHead
-                                                        className="text-slate-300 font-light">Price/Night</TableHead>
-                                                    <TableHead className="text-slate-300 font-light">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {dashboardData?.recentBookings.map((booking) => (
-                                                    <TableRow key={booking.room.id}
-                                                              className="border-slate-700/50 hover:bg-slate-700/20 transition-colors duration-200">
-                                                        <TableCell
-                                                            className="font-medium text-slate-200">{booking.room.roomNumber}</TableCell>
-                                                        <TableCell
-                                                            className="text-slate-300">{booking.room.roomType.name}</TableCell>
-                                                        <TableCell>
-                                                            <Badge className={getStatusColor(booking.status)}>
-                                                                {booking.status === "CONFIRMED" ? "Occupied" : "Available"}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell
-                                                            className="text-slate-300">{booking.status === "CONFIRMED" ? "2 guests" : "Empty"}</TableCell>
-                                                        <TableCell
-                                                            className="text-amber-400 font-medium">${booking.room.roomType.basePrice}</TableCell>
-                                                        <TableCell>
-                                                            <div className="flex gap-2">
-                                                                <Button variant="outline" size="sm"
-                                                                        className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300">
-                                                                    <Edit className="h-4 w-4"/>
-                                                                </Button>
-                                                                <Button variant="outline" size="sm"
-                                                                        className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-400 bg-transparent transition-all duration-300">
-                                                                    View
-                                                                </Button>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <RoomManagement dashboardData={dashboardData}/>
                         </TabsContent>
 
-                        <TabsContent value="settings">
-                            <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl font-light text-slate-100">System
-                                        Settings</CardTitle>
-                                    <CardDescription className="text-slate-400">
-                                        Configure your hotel management system
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-light text-slate-100">Hotel Information</h3>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Hotel
-                                                    Name</Label>
-                                                <Input
-                                                    defaultValue="Tranquility Inn"
-                                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Contact
-                                                    Email</Label>
-                                                <Input
-                                                    defaultValue="hello@tranquility-inn.com"
-                                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Phone
-                                                    Number</Label>
-                                                <Input
-                                                    defaultValue="+1 (555) 123-4567"
-                                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-light text-slate-100">Booking Settings</h3>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Check-in
-                                                    Time</Label>
-                                                <Input
-                                                    defaultValue="3:00 PM"
-                                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Check-out
-                                                    Time</Label>
-                                                <Input
-                                                    defaultValue="11:00 AM"
-                                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-slate-300 mb-2 block font-light">Cancellation
-                                                    Policy</Label>
-                                                <Select defaultValue="flexible">
-                                                    <SelectTrigger
-                                                        className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400">
-                                                        <SelectValue/>
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-slate-800 border-slate-700">
-                                                        <SelectItem value="flexible">Flexible</SelectItem>
-                                                        <SelectItem value="moderate">Moderate</SelectItem>
-                                                        <SelectItem value="strict">Strict</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-end">
-                                        <Button
-                                            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-light shadow-lg hover:shadow-amber-500/25 transition-all duration-300">
-                                            Save Settings
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                        <TabsContent value="clients">
+                            <GuestManagement/>
                         </TabsContent>
                     </Tabs>
                 </div>

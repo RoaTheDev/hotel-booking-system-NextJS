@@ -2,9 +2,9 @@ import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
 import {z, ZodError} from "zod";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {RoomWithDetails} from "@/lib/types/roomTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
+import {RoomWithDetails} from "@/types/roomTypes";
 
 const AvailabilityQuerySchema = z.object({
     checkIn: z.string().datetime(),
@@ -110,7 +110,7 @@ export const GET = async (req: NextRequest) => {
         if (err instanceof ZodError) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
-                message: "Invalid query parameters",
+                message: "Invalid hooks parameters",
                 data: null,
                 errors: validationErrorFormat(err),
             }, {status: HttpStatusCode.BadRequest});

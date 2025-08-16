@@ -14,7 +14,7 @@ import {Badge} from "@/components/ui/badge";
 import {debounce} from "lodash";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
-import {RoomWithDetails} from "@/lib/types/roomTypes";
+import {RoomWithDetails} from "@/types/roomTypes";
 
 export interface Pagination {
     page: number;
@@ -131,17 +131,24 @@ export const ClientRoomPage: FC<RoomData> = ({initialData}) => {
             }
         };
 
-        if (filters.page === 1 &&
+        const isInitialServerParams = filters.page === 1 &&
             filters.searchTerm === "" &&
             filters.guestCount === "any" &&
             filters.priceRange[0] === 100 &&
             filters.priceRange[1] === 1000 &&
-            filters.sortBy === "price") {
+            filters.sortBy === "price";
+
+        if (isInitialMount.current && isInitialServerParams) {
+            isInitialMount.current = false;
             return;
         }
 
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+        }
+
         fetchRooms();
-    }, [filters]);
+    }, [filters])
 
     useEffect(() => {
         const ctx = gsap.context(() => {

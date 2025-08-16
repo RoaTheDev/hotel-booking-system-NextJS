@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from "next/server";
-import {LoginFormData, LoginFormSchema, LoginResponse} from "@/lib/types/authTypes";
+import {LoginFormData, LoginFormSchema, LoginResponse} from "@/types/authTypes";
 import {prismaClient as prisma} from "@/lib/prismaClient";
-import {generateToken, verifyPassword} from "@/lib/jwt";
+import {generateToken, verifyPassword} from "@/utils/jwt";
 import {HttpStatusCode} from "axios";
 import {ZodError} from "zod";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
 
 export const POST = async (req: NextRequest) => {
     try {

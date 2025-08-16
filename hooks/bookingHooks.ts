@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {toast} from 'sonner'
-import {BookingWithDetails, CreateBookingData} from '@/lib/types/roomTypes'
-import {ApiResponse} from '@/lib/types/commonTypes'
+import {BookingWithDetails, CreateBookingData} from '@/types/roomTypes'
+import {ApiResponse} from '@/types/commonTypes'
 import axios from "axios";
 import {BookingsResponse} from "@/app/api/(domain)/bookings/route";
 

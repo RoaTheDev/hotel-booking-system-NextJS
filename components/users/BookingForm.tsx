@@ -12,9 +12,9 @@ import {Label} from "@/components/ui/label"
 import {Textarea} from "@/components/ui/textarea"
 import {Separator} from "@/components/ui/separator"
 import {ArrowLeft, Calendar, Users} from "lucide-react"
-import {CreateBookingData, CreateBookingSchema} from "@/lib/types/roomTypes"
-import {useCreateBooking} from "@/lib/query/bookingHooks"
-import {useAuthStore} from "@/lib/stores/AuthStore"
+import {CreateBookingData, CreateBookingSchema} from "@/types/roomTypes"
+import {useCreateBooking} from "@/hooks/bookingHooks"
+import {useAuthStore} from "@/stores/AuthStore"
 import {Room} from "@/app/api/(domain)/bookings/route";
 
 interface BookingFormProps {

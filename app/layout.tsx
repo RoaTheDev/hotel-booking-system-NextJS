@@ -3,9 +3,9 @@ import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import "./globals.css";
 import {Providers} from "@/app/providers";
-import {LayoutNavWrapper} from "@/components/LayoutNavWrapper";
-import NavigationProgressBar from "@/components/NavigationProgressBar";
-import AuthValidator from "@/components/AuthValidator";
+import {LayoutNavWrapper} from "@/components/layout/LayoutNavWrapper";
+import NavigationProgressBar from "@/components/common/NavigationProgressBar";
+import AuthValidator from "@/components/common/AuthValidator";
 
 const inter = Inter({
     subsets: ["latin"],

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ApiResponse } from "@/lib/types/commonTypes";
-import { verifyToken } from "@/lib/jwt";
+import { ApiResponse } from "@/types/commonTypes";
+import { verifyToken } from "@/utils/jwt";
 
 export const POST = async (request: NextRequest) => {
     const cookie = request.cookies.get("tranquility_token");

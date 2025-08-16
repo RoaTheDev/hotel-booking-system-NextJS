@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {getTokenFromCookie} from "@/lib/jwt";
+import {getTokenFromCookie} from "@/utils/jwt";
 import {HttpStatusCode} from "axios";
 
 export const authMiddleware = (request: NextRequest) => {

@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useState} from "react"
-import {Edit, Mail, Phone, Plus, Search, Shield, Trash2, User, Users} from "lucide-react"
+import {Edit, Mail, Phone, Plus, Search, Shield, User, Users} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
@@ -22,6 +22,7 @@ import axios from "axios"
 import {z} from "zod"
 import {toast} from "sonner"
 import {Role} from "@/app/generated/prisma"
+import {UpdateUserRequest} from "@/app/api/(protected)/user/[id]/route";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
     state = {hasError: false}
@@ -92,15 +93,6 @@ interface UserFormData {
     role: Role
 }
 
-interface UserUpdateData {
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    phone: string
-    role: Role
-    isDeleted: boolean
-}
 
 export function UserManagement() {
     const [searchTerm, setSearchTerm] = useState<string>("")
@@ -118,9 +110,9 @@ export function UserManagement() {
         phone: "",
         role: Role.STAFF,
     })
-    const [editData, setEditData] = useState<UserUpdateData>({
+    const [editData, setEditData] = useState<UpdateUserRequest>({
         email: "",
-        password: "",
+        passwordHash: "",
         firstName: "",
         lastName: "",
         phone: "",
@@ -142,7 +134,7 @@ export function UserManagement() {
             if (searchTerm) params.append('search', searchTerm)
             if (includeDeleted) params.append('includeDeleted', 'true')
 
-            const response = await axios.get(`/api/admin/users?${params}`)
+            const response = await axios.get(`/api/user/secure?${params}`)
             return response.data.data
         },
         retry: 2,
@@ -151,7 +143,7 @@ export function UserManagement() {
     const createUserMutation = useMutation({
         mutationFn: async (data: z.infer<typeof UserCreateSchema>) => {
             console.log("Submitting user data:", data)
-            const response = await axios.post('/api/admin/users', data)
+            const response = await axios.post('/api/user/secure', data)
             return response.data
         },
         onSuccess: async () => {
@@ -168,7 +160,7 @@ export function UserManagement() {
     const updateUserMutation = useMutation({
         mutationFn: async ({id, data}: { id: number, data: z.infer<typeof UserUpdateSchema> }) => {
             console.log("Updating user ID:", id, "with data:", data)
-            const response = await axios.put(`/api/admin/users/${id}`, data)
+            const response = await axios.put(`/api/user/${id}`, data)
             return response.data
         },
         onSuccess: async () => {
@@ -182,19 +174,6 @@ export function UserManagement() {
         },
     })
 
-    const deleteUserMutation = useMutation({
-        mutationFn: async (id: number) => {
-            const response = await axios.put(`/api/admin/users/${id}`, { isDeleted: true })
-            return response.data
-        },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: ['users']})
-            toast.success("User deleted successfully")
-        },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.message || error.message || "Failed to delete user")
-        },
-    })
 
     const resetForm = () => {
         setFormData({
@@ -210,7 +189,7 @@ export function UserManagement() {
     const resetEditForm = () => {
         setEditData({
             email: "",
-            password: "",
+            passwordHash: "",
             firstName: "",
             lastName: "",
             phone: "",
@@ -246,7 +225,7 @@ export function UserManagement() {
         setSelectedUser(user)
         setEditData({
             email: user.email,
-            password: "",
+            passwordHash: "",
             firstName: user.firstName,
             lastName: user.lastName,
             phone: user.phone || "",
@@ -262,18 +241,17 @@ export function UserManagement() {
             return
         }
         try {
-            const updatePayload: any = {
+            const updatePayload: UpdateUserRequest = {
                 email: editData.email,
                 firstName: editData.firstName,
                 lastName: editData.lastName,
-                phone: editData.phone || null,
+                phone: editData.phone,
                 role: editData.role,
                 isDeleted: editData.isDeleted,
             }
 
-            // Only include password if it's provided
-            if (editData.password) {
-                updatePayload.password = editData.password
+            if (editData.passwordHash && editData.passwordHash.length > 8) {
+                updatePayload.passwordHash = editData.passwordHash
             }
 
             const validatedData = UserUpdateSchema.parse(updatePayload)
@@ -417,9 +395,13 @@ export function UserManagement() {
                                             <Label className="text-slate-300 mb-2 block font-light">Role *</Label>
                                             <Select
                                                 value={formData.role}
-                                                onValueChange={(value) => setFormData({...formData, role: value as Role})}
+                                                onValueChange={(value) => setFormData({
+                                                    ...formData,
+                                                    role: value as Role
+                                                })}
                                             >
-                                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-100">
+                                                <SelectTrigger
+                                                    className="bg-slate-700/50 border-slate-600 text-slate-100">
                                                     <SelectValue/>
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -456,7 +438,8 @@ export function UserManagement() {
                         <div className="col-span-2">
                             <Label className="text-slate-300 mb-2 block font-light">Search Users</Label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"/>
+                                <Search
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"/>
                                 <Input
                                     placeholder="Search by name or email..."
                                     value={searchTerm}
@@ -468,7 +451,8 @@ export function UserManagement() {
                         <div>
                             <Label className="text-slate-300 mb-2 block font-light">Role Filter</Label>
                             <Select value={roleFilter} onValueChange={setRoleFilter}>
-                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-blue-400">
+                                <SelectTrigger
+                                    className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-blue-400">
                                     <SelectValue/>
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -537,7 +521,8 @@ export function UserManagement() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge className={`${getRoleColor(user.role)} border flex items-center gap-1 w-fit`}>
+                                            <Badge
+                                                className={`${getRoleColor(user.role)} border flex items-center gap-1 w-fit`}>
                                                 <Shield className="h-3 w-3"/>
                                                 {user.role}
                                             </Badge>
@@ -561,17 +546,6 @@ export function UserManagement() {
                                                 >
                                                     <Edit className="h-4 w-4"/>
                                                 </Button>
-                                                {!user.isDeleted && (
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => deleteUserMutation.mutate(user.id)}
-                                                        disabled={deleteUserMutation.isPending}
-                                                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-400 bg-transparent transition-all duration-300"
-                                                    >
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -660,8 +634,8 @@ export function UserManagement() {
                                         <Label className="text-slate-300 mb-2 block font-light">New Password</Label>
                                         <Input
                                             type="password"
-                                            value={editData.password}
-                                            onChange={(e) => setEditData({...editData, password: e.target.value})}
+                                            value={editData.passwordHash}
+                                            onChange={(e) => setEditData({...editData, passwordHash: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Leave empty to keep current password"
                                         />
@@ -679,9 +653,13 @@ export function UserManagement() {
                                             <Label className="text-slate-300 mb-2 block font-light">Role *</Label>
                                             <Select
                                                 value={editData.role}
-                                                onValueChange={(value) => setEditData({...editData, role: value as Role})}
+                                                onValueChange={(value) => setEditData({
+                                                    ...editData,
+                                                    role: value as Role
+                                                })}
                                             >
-                                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-100">
+                                                <SelectTrigger
+                                                    className="bg-slate-700/50 border-slate-600 text-slate-100">
                                                     <SelectValue/>
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-slate-800 border-slate-700">

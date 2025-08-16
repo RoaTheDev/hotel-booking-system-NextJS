@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
-import {AuthError, requireAdminAuth, requireAuth} from "@/lib/middleware/auth";
-import {BookingWithDetails} from "@/lib/types/roomTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {AuthError, requireAdminAuth, requireAuth} from "@/middleware/auth";
+import {BookingWithDetails} from "@/types/roomTypes";
 import {$Enums, BookingStatus, Prisma} from "@/app/generated/prisma";
 import {z, ZodError} from "zod";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
 import Role = $Enums.Role;
 import BookingWhereInput = Prisma.BookingWhereInput;
 

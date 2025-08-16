@@ -1,12 +1,12 @@
 import {useMutation, useQuery} from "@tanstack/react-query";
-import {useAuthStore} from "@/lib/stores/AuthStore";
-import {ServerSignupFromData} from "@/lib/types/authTypes";
-import {fetchUserProfile} from "@/lib/data/authApi";
+import {useAuthStore} from "@/stores/AuthStore";
+import {ServerSignupFromData} from "@/types/authTypes";
+import {fetchUserProfile} from "@/data/authApi";
 
 export const useLogin = () => {
     const login = useAuthStore((state) => state.login);
     return useMutation({
-        mutationFn: ({ email, password }: { email: string; password: string }) =>
+        mutationFn: ({email, password}: { email: string; password: string }) =>
             login(email, password),
     });
 };

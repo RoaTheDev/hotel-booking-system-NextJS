@@ -3,9 +3,9 @@ import { prismaClient as prisma } from "@/lib/prismaClient";
 import { HttpStatusCode } from "axios";
 import { ZodError } from "zod";
 import { z } from "zod";
-import { ApiErrorResponse, ApiResponse } from "@/lib/types/commonTypes";
-import { validationErrorFormat } from "@/lib/zodErrorFormat";
-import { requireAdminAuth, AuthError } from "@/lib/middleware/auth";
+import { ApiErrorResponse, ApiResponse } from "@/types/commonTypes";
+import { validationErrorFormat } from "@/utils/zodErrorFormat";
+import { requireAdminAuth, AuthError } from "@/middleware/auth";
 
 const RoomAmenitySchema = z.object({
     amenityIds: z.array(z.number().int().positive()),

@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from "next/server";
 import {prismaClient as prisma} from "@/lib/prismaClient";
 import {HttpStatusCode} from "axios";
-import {ApiErrorResponse, ApiResponse} from "@/lib/types/commonTypes";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
 import {Amenity, Prisma} from "@/app/generated/prisma";
 import {z, ZodError} from "zod";
-import {validationErrorFormat} from "@/lib/zodErrorFormat";
-import {AuthError, requireAdminAuth} from "@/lib/middleware/auth";
+import {validationErrorFormat} from "@/utils/zodErrorFormat";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
 import AmenityWhereInput = Prisma.AmenityWhereInput;
 
 const AmenitySchema = z.object({
