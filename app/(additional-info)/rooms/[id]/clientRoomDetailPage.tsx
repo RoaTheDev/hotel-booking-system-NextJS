@@ -133,11 +133,6 @@ export default function ClientRoomDetail({ room }: { room: RoomWithDetails }) {
           </div>
           <div className="flex items-center gap-6 text-slate-300">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <span className="font-medium text-amber-400">4.8</span>
-              <span className="text-slate-400">(127 reviews)</span>
-            </div>
-            <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span>Up to {room.roomType.maxGuests} guests</span>
             </div>

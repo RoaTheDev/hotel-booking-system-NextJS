@@ -319,7 +319,7 @@ export const DiningClientPage = () => {
                         sourcing the finest seasonal ingredients and preparing each dish with mindful attention to the present
                         moment.`}
                     </p>
-                    <Link href="/booking">
+                    <Link href="/rooms">
                         <Button
                             size="lg"
                             className="bg-slate-800/50 backdrop-blur-sm border border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 px-12 py-4 text-lg font-light tracking-wide transition-all duration-500 hover:scale-110 hover:shadow-lg hover:shadow-amber-400/25"

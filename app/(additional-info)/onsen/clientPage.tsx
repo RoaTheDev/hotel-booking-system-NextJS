@@ -298,7 +298,7 @@ export const OnsenClientPage = () => {
                         spiritual connection. We provide guidance on traditional etiquette to ensure a respectful and transformative
                         experience for all guests.`}
                     </p>
-                    <Link href="/booking">
+                    <Link href="/rooms">
                         <Button
                             size="lg"
                             className="bg-slate-800/50 backdrop-blur-sm border border-blue-400/30 text-blue-400 hover:bg-blue-400/10 hover:border-blue-400 px-12 py-4 text-lg font-light tracking-wide transition-all duration-500 hover:scale-110 hover:shadow-lg hover:shadow-blue-400/25"

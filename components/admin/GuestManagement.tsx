@@ -121,7 +121,7 @@ export function GuestManagement() {
 
     const queryClient = useQueryClient()
 
-    // Fetch guests (only GUEST role users)
+
     const {data: guestsData, isLoading: guestsLoading, error: guestsError} = useQuery<GuestsResponse>({
         queryKey: ['guests', currentPage, searchTerm, includeDeleted],
         queryFn: async () => {

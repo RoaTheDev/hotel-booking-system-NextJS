@@ -14,7 +14,7 @@ import {
     XAxis,
     YAxis
 } from "recharts"
-import {Activity, Calendar, Clock, DollarSign, Home, Settings, Star, TrendingUp, User2Icon, Users} from "lucide-react"
+import {Activity, Calendar, Clock, DollarSign, Home, Star, TrendingUp, User2Icon, Users} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
@@ -28,7 +28,7 @@ import axios from "axios"
 import {AdminDashboardStats, BookingWithDetails} from "@/types/roomTypes"
 import {BookingManagement} from "@/components/admin/BookingManagement"
 import {UserManagement} from "@/components/admin/UserManagement"
-import {RoomManagement} from "@/components/admin/RoomManagement"
+import RoomManagement from "@/components/admin/RoomManagement"
 import {GuestManagement} from "@/components/admin/GuestManagement";
 
 interface RevenueData {
@@ -562,7 +562,7 @@ export default function EnhancedAdminDashboard(): JSX.Element {
                         </TabsContent>
 
                         <TabsContent value="rooms">
-                            <RoomManagement dashboardData={dashboardData}/>
+                            <RoomManagement/>
                         </TabsContent>
 
                         <TabsContent value="clients">

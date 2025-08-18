@@ -259,7 +259,7 @@ export const GardenClientPage: FC<GardenPageProps> = ({ gardenSections }) => {
             with intention, creating spaces where the boundary between inner and outer landscape dissolves, revealing
             the profound interconnectedness of all existence.`}
                     </p>
-                    <Link href="/experience">
+                    <Link href="/rooms">
                         <Button
                             size="lg"
                             className="bg-slate-800/50 backdrop-blur-sm border border-emerald-400/30 text-emerald-400 hover:bg-emerald-400/10 hover:border-emerald-400 px-12 py-4 text-lg font-light tracking-wide transition-all duration-500 hover:scale-110 hover:shadow-lg hover:shadow-emerald-400/25"
