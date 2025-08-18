@@ -7,7 +7,7 @@ export const amenities = [
         description: "Tranquil outdoor spaces designed for mindfulness and reflection under ancient mountain pines",
         icon: Flower,
         category: "Wellness",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark zen garden with stone paths and meditation areas",
+        imageUrl: "/meditation_garden.jpg",
         features: ["Guided meditation sessions", "Peaceful water features", "Aromatherapy plants", "Quiet zones"],
     },
     {
@@ -16,7 +16,7 @@ export const amenities = [
         description: "Natural thermal waters sourced from deep mountain springs for ultimate relaxation",
         icon: Waves,
         category: "Wellness",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark mountain hot springs with steam and rocks",
+        imageUrl: "/hot_spring.jpg",
         features: ["Natural mineral waters", "Private onsen", "Stargazing pools", "Therapeutic treatments"],
     },
     {
@@ -25,7 +25,7 @@ export const amenities = [
         description: "Modern fitness facilities with yoga classes and personal training in mountain serenity",
         icon: Dumbbell,
         category: "Fitness",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark modern wellness studio with mountain views",
+        imageUrl: "/wellness_studio.jpeg",
         features: ["Daily yoga classes", "Personal training", "Meditation workshops", "Fitness equipment"],
     },
     {
@@ -34,7 +34,7 @@ export const amenities = [
         description: "Stunning infinity pool overlooking the mountain valleys with heated comfort year-round",
         icon: Mountain,
         category: "Recreation",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark infinity pool with mountain valley views",
+        imageUrl: "/infinite_pool.jpg",
         features: ["Heated pool", "Pool bar service", "Lounge chairs", "Sunset views"],
     },
     {
@@ -43,7 +43,7 @@ export const amenities = [
         description: "Farm-to-table restaurant focusing on seasonal, organic mountain cuisine",
         icon: Utensils,
         category: "Dining",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark elegant mountain restaurant with warm lighting",
+        imageUrl: "/mount_cuisine.jpg",
         features: ["Organic ingredients", "Seasonal menus", "Wine pairings", "Private dining"],
     },
     {
@@ -52,7 +52,7 @@ export const amenities = [
         description: "Scenic walking paths through ancient forests and meadows with guided nature experiences",
         icon: TreePine,
         category: "Recreation",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark forest trail with dappled sunlight",
+        imageUrl: "/forest_trail.jpg",
         features: ["Guided nature walks", "Bird watching", "Photography spots", "Picnic areas"],
     },
     {
@@ -61,7 +61,7 @@ export const amenities = [
         description: "Elevated platform perfect for morning meditation and yoga with panoramic mountain views",
         icon: Sun,
         category: "Wellness",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark wooden deck with sunrise mountain views",
+        imageUrl: "/sunrise_deck.jpg",
         features: ["Morning yoga", "Sunrise viewing", "Meditation space", "Tea service"],
     },
     {
@@ -70,7 +70,7 @@ export const amenities = [
         description: "Quiet reading space with books on mindfulness, nature, and personal growth",
         icon: Coffee,
         category: "Relaxation",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark cozy library with fireplace and mountain views",
+        imageUrl: "/wellness_lib.jpg",
         features: ["Wellness books", "Quiet atmosphere", "Comfortable seating", "Tea and coffee"],
     },
     {
@@ -79,7 +79,7 @@ export const amenities = [
         description: "Full-service spa offering rejuvenating treatments inspired by mountain healing traditions",
         icon: Heart,
         category: "Wellness",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark luxurious spa treatment room with candles",
+        imageUrl: "/jp_spa.jpg",
         features: ["Massage therapy", "Facial treatments", "Aromatherapy", "Couples treatments"],
     },
     {
@@ -88,7 +88,7 @@ export const amenities = [
         description: "High-altitude observatory for celestial viewing and astronomical meditation",
         icon: Sparkles,
         category: "Recreation",
-        imageUrl: "/placeholder.svg?height=300&width=400&text=Dark observatory dome with night sky and stars",
+        imageUrl: "/stargaze.jpg",
         features: ["Telescope access", "Guided stargazing", "Astronomy talks", "Night photography"],
     },
 ]

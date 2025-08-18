@@ -148,16 +148,6 @@ export const GardenClientPage: FC<GardenPageProps> = ({ gardenSections }) => {
 
             {/* Hero Section */}
             <section ref={heroRef} className="relative py-20 overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/placeholder.svg?height=600&width=1920&text=Dark+zen+garden+with+stone+paths+and+meditation+areas"
-                        alt="Zen garden overview"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/90" />
-                </div>
 
                 <div className="hero-content relative z-10 text-center max-w-4xl mx-auto px-4">
                     <h1 className="text-4xl md:text-6xl font-light text-slate-100 mb-6 leading-tight tracking-wide">
