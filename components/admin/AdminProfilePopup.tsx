@@ -1,30 +1,31 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { gsap } from "gsap"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import {User, Save, X, LogOut, Edit} from "lucide-react"
-import { ProfileForm, profileSchema } from "@/types/authTypes"
-import { useAuthStore } from "@/stores/AuthStore"
-import { toast } from "sonner"
+import React, {useEffect, useRef, useState} from "react"
+import {useForm} from "react-hook-form"
+import {zodResolver} from "@hookform/resolvers/zod"
+import {gsap} from "gsap"
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Badge} from "@/components/ui/badge"
+import {Edit, LogOut, Save, User, X} from "lucide-react"
+import {ProfileForm, profileSchema} from "@/types/authTypes"
+import {useAuthStore} from "@/stores/AuthStore"
+import {toast} from "sonner"
+import {useRouter} from "next/navigation";
 
 export const AdminProfilePopup = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const { user, isAuthenticated, isHydrated, updateProfile, logout } = useAuthStore()
+    const {user, isAuthenticated, isHydrated, updateProfile, logout, revalidateSession} = useAuthStore()
     const modalRef = useRef<HTMLDivElement>(null)
     const overlayRef = useRef<HTMLDivElement>(null)
-
+    const route = useRouter();
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
         reset,
     } = useForm<ProfileForm>({
         resolver: zodResolver(profileSchema),
@@ -52,13 +53,13 @@ export const AdminProfilePopup = () => {
             if (isOpen) {
                 gsap.fromTo(
                     overlayRef.current,
-                    { opacity: 0 },
-                    { opacity: 0.8, duration: 0.3, ease: "power2.out" }
+                    {opacity: 0},
+                    {opacity: 0.8, duration: 0.3, ease: "power2.out"}
                 )
                 gsap.fromTo(
                     modalRef.current,
-                    { opacity: 0, scale: 0.9, y: 0 },
-                    { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+                    {opacity: 0, scale: 0.9, y: 0},
+                    {opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)"}
                 )
 
                 const inputs = gsap.utils.toArray(".form-input")
@@ -68,15 +69,15 @@ export const AdminProfilePopup = () => {
                     const label = input.querySelector("label")
 
                     field?.addEventListener("focus", () => {
-                        gsap.to(label, { scale: 0.9, y: -5, color: "#f59e0b", duration: 0.3 })
-                        gsap.to(input, { scale: 1.02, duration: 0.3 })
+                        gsap.to(label, {scale: 0.9, y: -5, color: "#f59e0b", duration: 0.3})
+                        gsap.to(input, {scale: 1.02, duration: 0.3})
                     })
 
                     field?.addEventListener("blur", () => {
                         if (!field.value) {
-                            gsap.to(label, { scale: 1, y: 0, color: "#94a3b8", duration: 0.3 })
+                            gsap.to(label, {scale: 1, y: 0, color: "#94a3b8", duration: 0.3})
                         }
-                        gsap.to(input, { scale: 1, duration: 0.3 })
+                        gsap.to(input, {scale: 1, duration: 0.3})
                     })
                 })
             }
@@ -87,7 +88,7 @@ export const AdminProfilePopup = () => {
 
     const onSubmit = async (data: ProfileForm) => {
         setIsLoading(true)
-        gsap.to(".save-btn", { scale: 0.95, duration: 0.1 })
+        gsap.to(".save-btn", {scale: 0.95, duration: 0.1})
 
         try {
             await updateProfile(data)
@@ -104,17 +105,22 @@ export const AdminProfilePopup = () => {
             console.error("Profile update failed:", error)
             toast.error("Failed to update profile")
             const tl = gsap.timeline()
-            tl.to(modalRef.current, { x: -10, duration: 0.1, ease: "power2.inOut" })
-                .to(modalRef.current, { x: 10, duration: 0.1, ease: "power2.inOut" })
-                .to(modalRef.current, { x: -10, duration: 0.1, ease: "power2.inOut" })
-                .to(modalRef.current, { x: 10, duration: 0.1, ease: "power2.inOut" })
-                .to(modalRef.current, { x: 0, duration: 0.1, ease: "power2.inOut" })
+            tl.to(modalRef.current, {x: -10, duration: 0.1, ease: "power2.inOut"})
+                .to(modalRef.current, {x: 10, duration: 0.1, ease: "power2.inOut"})
+                .to(modalRef.current, {x: -10, duration: 0.1, ease: "power2.inOut"})
+                .to(modalRef.current, {x: 10, duration: 0.1, ease: "power2.inOut"})
+                .to(modalRef.current, {x: 0, duration: 0.1, ease: "power2.inOut"})
         } finally {
             setIsLoading(false)
-            gsap.to(".save-btn", { scale: 1, duration: 0.2 })
+            gsap.to(".save-btn", {scale: 1, duration: 0.2})
         }
     }
+    const onSignOut = async () => {
+        await logout()
+        await revalidateSession()
+        route.push('/')
 
+    }
     const handleCancel = () => {
         reset()
         setIsEditing(false)
@@ -136,7 +142,7 @@ export const AdminProfilePopup = () => {
             ease: "power2.in",
             onComplete: () => setIsOpen(false),
         })
-        gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, ease: "power2.in" })
+        gsap.to(overlayRef.current, {opacity: 0, duration: 0.3, ease: "power2.in"})
     }
 
     if (!isHydrated || !isAuthenticated) {
@@ -170,12 +176,13 @@ export const AdminProfilePopup = () => {
                             className="absolute top-4 right-4 text-slate-400 hover:text-slate-100 hover:bg-slate-700/50"
                             onClick={handleClose}
                         >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4"/>
                         </Button>
 
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                <User className="h-6 w-6 text-slate-900" />
+                            <div
+                                className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <User className="h-6 w-6 text-slate-900"/>
                             </div>
                             <div>
                                 <h2 className="text-xl font-light text-slate-100">
@@ -260,7 +267,7 @@ export const AdminProfilePopup = () => {
                                         onClick={() => setIsEditing(true)}
                                         className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
                                     >
-                                        <Edit className="h-4 w-4" />
+                                        <Edit className="h-4 w-4"/>
                                         Edit Profile
                                     </Button>
                                 ) : (
@@ -271,7 +278,7 @@ export const AdminProfilePopup = () => {
                                             variant="outline"
                                             className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
                                         >
-                                            <X className="h-4 w-4 mr-2" />
+                                            <X className="h-4 w-4 mr-2"/>
                                             Cancel
                                         </Button>
                                         <Button
@@ -279,7 +286,7 @@ export const AdminProfilePopup = () => {
                                             className="save-btn bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
                                             disabled={isLoading}
                                         >
-                                            <Save className="h-4 w-4" />
+                                            <Save className="h-4 w-4"/>
                                             {isLoading ? "Saving..." : "Save Changes"}
                                         </Button>
                                     </div>
@@ -288,20 +295,9 @@ export const AdminProfilePopup = () => {
                         </form>
 
                         <div className="mt-6 pt-6 border-t border-slate-700/50">
-                            <div className="flex justify-between items-center p-4 border border-slate-700/50 rounded-lg bg-slate-700/20 hover:bg-slate-700/30 transition-all duration-300">
-                                <div>
-                                    <h3 className="font-medium text-slate-100">Change Password</h3>
-                                    <p className="text-sm text-slate-400">Update your account password for security</p>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-purple-400/30 text-purple-400 hover:bg-purple-400/10 hover:border-purple-400 bg-transparent transition-all duration-300"
-                                >
-                                    Change
-                                </Button>
-                            </div>
-                            <div className="flex justify-between items-center p-4 border border-red-500/50 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 mt-4">
+
+                            <div
+                                className="flex justify-between items-center p-4 border border-red-500/50 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 mt-4">
                                 <div>
                                     <h3 className="font-medium text-red-400">Sign Out</h3>
                                     <p className="text-sm text-red-300">Log out of your admin account</p>
@@ -309,10 +305,10 @@ export const AdminProfilePopup = () => {
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    onClick={logout}
+                                    onClick={onSignOut}
                                     className="bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500 transition-all duration-300"
                                 >
-                                    <LogOut className="h-4 w-4 mr-2" />
+                                    <LogOut className="h-4 w-4 mr-2"/>
                                     Sign Out
                                 </Button>
                             </div>

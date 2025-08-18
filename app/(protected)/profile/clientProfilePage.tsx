@@ -30,7 +30,7 @@ export const ClientProfilePage = () => {
     const logout = useLogout()
     const [bookingStatus, setBookingStatus] = useState<string>("ALL")
     const [currentPage, setCurrentPage] = useState(1)
-
+    const {revalidateSession} = useAuthStore();
     const {data: bookingsData, isLoading: bookingsLoading} = useUserBookings({
         page: currentPage,
         limit: 10,
@@ -171,6 +171,7 @@ export const ClientProfilePage = () => {
     }, [])
     const onSignOut = async () => {
         await logout.mutateAsync()
+        await revalidateSession()
         route.push('/');
     }
     const onSubmit = async (data: ProfileForm) => {

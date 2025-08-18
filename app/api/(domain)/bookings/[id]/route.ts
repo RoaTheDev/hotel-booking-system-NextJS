@@ -11,7 +11,7 @@ import Role = $Enums.Role;
 import BookingWhereInput = Prisma.BookingWhereInput;
 
 interface RouteParams {
-    params: { id: string };
+    params: Promise<{ id: string }>; // Updated to use Promise
 }
 
 export const GET = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
@@ -105,11 +105,11 @@ export const GET = async (req: NextRequest, context: { params: Promise<{ id: str
     }
 };
 
-export const DELETE = async (req: NextRequest, {params}: RouteParams) => {
+export const DELETE = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
         const user = requireAuth(req);
-
-        const bookingId = parseInt(params.id);
+        const {id} = await context.params
+        const bookingId = parseInt(id);
         if (isNaN(bookingId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,

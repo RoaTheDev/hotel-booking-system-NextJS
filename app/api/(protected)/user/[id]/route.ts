@@ -42,11 +42,11 @@ interface UpdatedUser {
     updatedAt: Date;
 }
 
-export const PUT = async (req: NextRequest, {params}: { params: { id: string } }) => {
+export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const userId = parseInt(params.id);
+        const {id} = await params
+        const userId = parseInt(id);
 
         if (isNaN(userId) || userId <= 0) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
@@ -185,6 +185,7 @@ export const PUT = async (req: NextRequest, {params}: { params: { id: string } }
     }
 };
 
-export const PATCH = async (req: NextRequest, {params}: { params: { id: string } }) => {
+export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
+
     return PUT(req, {params});
 };

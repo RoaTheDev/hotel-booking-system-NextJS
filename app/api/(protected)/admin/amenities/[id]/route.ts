@@ -27,11 +27,11 @@ interface AmenityWithDetails {
     };
 }
 
-export const GET = async (req: NextRequest, {params}: {params: {id: string}}) => {
+export const GET = async (req: NextRequest, {params}: {params: Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req);
-
-        const amenityId = parseInt(params.id);
+        const {id} = await params
+        const amenityId = parseInt(id);
         if (isNaN(amenityId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
@@ -102,11 +102,11 @@ export const GET = async (req: NextRequest, {params}: {params: {id: string}}) =>
     }
 };
 
-export const PUT = async (req: NextRequest, {params}: {params: {id: string}}) => {
+export const PUT = async (req: NextRequest, {params}: {params: Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req);
-
-        const amenityId = parseInt(params.id);
+        const {id} = await params
+        const amenityId = parseInt(id);
         if (isNaN(amenityId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
@@ -200,11 +200,11 @@ export const PUT = async (req: NextRequest, {params}: {params: {id: string}}) =>
     }
 };
 
-export const DELETE = async (req: NextRequest, {params}: {params: {id: string}}) => {
+export const DELETE = async (req: NextRequest, {params}: {params: Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req);
-
-        const amenityId = parseInt(params.id);
+        const {id} = await params
+        const amenityId = parseInt(id);
         if (isNaN(amenityId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,

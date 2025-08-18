@@ -41,11 +41,11 @@ interface RoomDetails {
 }
 
 // GET /api/admin/rooms/[Imageid]
-export const GET = async (req: NextRequest, {params}: { params: { id: string } }) => {
+export const GET = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} = await params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>(
                 {
@@ -184,11 +184,11 @@ interface UpdatedRoom {
 }
 
 // PUT /api/admin/rooms/[Imageid]
-export const PUT = async (req: NextRequest, {params}: { params: { id: string } }) => {
+export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} = await params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>(
                 {
@@ -462,11 +462,11 @@ return NextResponse.json<ApiResponse<UpdatedRoom>>({
 ;
 
 // DELETE /api/admin/rooms/[Imageid]
-export const DELETE = async (req: NextRequest, {params}: { params: { id: string } }) => {
+export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} = await params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>(
                 {

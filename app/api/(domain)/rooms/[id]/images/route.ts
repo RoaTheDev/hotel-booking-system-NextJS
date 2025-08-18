@@ -6,7 +6,6 @@ import { z } from "zod";
 import { ApiErrorResponse, ApiResponse } from "@/types/commonTypes";
 import { validationErrorFormat } from "@/utils/zodErrorFormat";
 import { requireAdminAuth, AuthError } from "@/middleware/auth";
-import {RouteParams} from "@/types/roomTypes";
 
 const RoomImageSchema = z.object({
     imageUrl: z.string().url("Invalid image URL"),
@@ -14,11 +13,11 @@ const RoomImageSchema = z.object({
 });
 type RoomImagesType = z.infer<typeof RoomImageSchema>
 
-export const POST = async (req: NextRequest, { params }: RouteParams) => {
+export const POST = async (req: NextRequest, context : { params: Promise<{id:string}> }) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} = await context.params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,

@@ -8,13 +8,13 @@ import {RoomType} from "@/app/generated/prisma";
 import {ZodError} from "zod";
 import {validationErrorFormat} from "@/utils/zodErrorFormat";
 
-interface RouteParams {
-    params: { id: string };
-}
 
-export const GET = async ({params}: RouteParams) => {
+
+export const GET = async (_: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
-        const roomTypeId = parseInt(params.id);
+        const {id} = await context.params
+        const roomTypeId = parseInt(id);
+
 
         if (isNaN(roomTypeId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
@@ -78,12 +78,11 @@ export const GET = async ({params}: RouteParams) => {
 };
 
 
-
-export const PUT = async (req: NextRequest, {params}: RouteParams) => {
+export const PUT = async (req: NextRequest, context: {params: Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req);
-
-        const roomTypeId = parseInt(params.id);
+        const {id} = await context.params
+        const roomTypeId = parseInt(id);
 
         if (isNaN(roomTypeId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
@@ -182,11 +181,11 @@ export const PUT = async (req: NextRequest, {params}: RouteParams) => {
     }
 };
 
-export const DELETE = async (req: NextRequest, {params}: RouteParams) => {
+export const DELETE = async (req: NextRequest, context:{params:Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req);
-
-        const roomTypeId = parseInt(params.id);
+        const {id} = await context.params
+        const roomTypeId = parseInt(id);
 
         if (isNaN(roomTypeId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({

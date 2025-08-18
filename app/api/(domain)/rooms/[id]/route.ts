@@ -11,9 +11,10 @@ interface RouteParams {
     params: { id: string };
 }
 
-export const GET = async (_: NextRequest,{ params }: { params: { id: string } }) => {
+export const GET = async (_: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
-        const roomId = parseInt(params.id);
+        const {id} = await context.params
+        const roomId = parseInt(id);
 
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
@@ -78,10 +79,11 @@ export const GET = async (_: NextRequest,{ params }: { params: { id: string } })
     }
 };
 
-export const PATCH = async (req: NextRequest, {params}: RouteParams) => {
+export const PATCH = async (req: NextRequest, context: {params: Promise<{id:string}>}) => {
     try {
         requireAdminAuth(req)
-        const roomId = parseInt(params.id);
+        const {id} = await context.params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
@@ -193,10 +195,11 @@ export const PATCH = async (req: NextRequest, {params}: RouteParams) => {
     }
 };
 
-export const DELETE = async (req: NextRequest,{params}: RouteParams) => {
+export const DELETE = async (req: NextRequest, context:{params: Promise<{id: string}>}) => {
     try {
         requireAdminAuth(req)
-        const roomId = parseInt(params.id);
+        const {id} =await  context.params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,

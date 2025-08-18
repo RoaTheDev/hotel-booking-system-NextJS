@@ -1,10 +1,10 @@
 // /api/admin/rooms/[roomId]/images/[imageId]/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { prismaClient as prisma } from "@/lib/prismaClient";
-import { HttpStatusCode } from "axios";
-import { ApiErrorResponse, ApiResponse } from "@/types/commonTypes";
-import { AuthError, requireAdminAuth } from "@/middleware/auth";
-import { z } from "zod";
+import {NextRequest, NextResponse} from "next/server";
+import {prismaClient as prisma} from "@/lib/prismaClient";
+import {HttpStatusCode} from "axios";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
+import {z} from "zod";
 
 interface RoomImage {
     id: number;
@@ -15,26 +15,26 @@ interface RoomImage {
 }
 
 // GET /api/admin/rooms/[roomId]/images/[imageId]
-export const GET = async (req: NextRequest, { params }: { params: { id: string; imageId: string } }) => {
+export const GET = async (req: NextRequest, {params}: { params: Promise<{ id: string; imageId: string }> }) => {
     try {
         requireAdminAuth(req);
+        const {id, imageId} = await params;
+        const roomId = parseInt(id);
+        const imgId = parseInt(imageId);
 
-        const roomId = parseInt(params.id);
-        const imageId = parseInt(params.imageId);
-
-        if (isNaN(roomId) || isNaN(imageId)) {
+        if (isNaN(roomId) || isNaN(imgId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid room ID or image ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         // Verify room exists
         const room = await prisma.room.findUnique({
-            where: { id: roomId, isDeleted: false },
-            select: { id: true }
+            where: {id: roomId, isDeleted: false},
+            select: {id: true}
         });
 
         if (!room) {
@@ -42,13 +42,13 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: "Room not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         const image = await prisma.roomImage.findUnique({
             where: {
-                id: imageId,
+                id: imgId,
                 roomId: roomId
             }
         });
@@ -58,8 +58,8 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: "Room image not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         return NextResponse.json<ApiResponse<RoomImage>>({
@@ -74,17 +74,17 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error fetching room image:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error fetching room image",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 }
 
@@ -99,20 +99,20 @@ interface UpdateRoomImageRequest {
 }
 
 // PUT /api/admin/rooms/[roomId]/images/[imageId]
-export const PUT = async (req: NextRequest, { params }: { params: { id: string; imageId: string } }) => {
+export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: string; imageId: string }> }) => {
     try {
         requireAdminAuth(req);
+        const {id, imageId} = await params
+        const roomId = parseInt(id);
+        const imgId = parseInt(imageId);
 
-        const roomId = parseInt(params.id);
-        const imageId = parseInt(params.imageId);
-
-        if (isNaN(roomId) || isNaN(imageId)) {
+        if (isNaN(roomId) || isNaN(imgId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid room ID or image ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const body: UpdateRoomImageRequest = await req.json();
@@ -126,15 +126,15 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 errors: {
                     type: "ValidationError",
                 },
-            }, { status: HttpStatusCode.BadRequest });
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const updateData = validationResult.data;
 
         // Verify room exists and is not deleted
         const room = await prisma.room.findUnique({
-            where: { id: roomId, isDeleted: false },
-            select: { id: true, roomNumber: true }
+            where: {id: roomId, isDeleted: false},
+            select: {id: true, roomNumber: true}
         });
 
         if (!room) {
@@ -142,14 +142,14 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: "Room not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         // Verify image exists and belongs to the room
         const existingImage = await prisma.roomImage.findUnique({
             where: {
-                id: imageId,
+                id: imgId,
                 roomId: roomId
             }
         });
@@ -159,8 +159,8 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: "Room image not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         // Check for URL conflicts (if updating URL)
@@ -169,7 +169,7 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 where: {
                     roomId,
                     imageUrl: updateData.imageUrl,
-                    id: { not: imageId }
+                    id: {not: imgId}
                 }
             });
 
@@ -178,8 +178,8 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                     success: false,
                     message: "Image URL already exists for this room",
                     data: null,
-                    errors: { type: "ConflictError" },
-                }, { status: HttpStatusCode.Conflict });
+                    errors: {type: "ConflictError"},
+                }, {status: HttpStatusCode.Conflict});
             }
         }
 
@@ -193,12 +193,12 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: "No valid fields to update",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const updatedImage = await prisma.roomImage.update({
-            where: { id: imageId },
+            where: {id: imgId},
             data: updateFields
         });
 
@@ -214,40 +214,40 @@ export const PUT = async (req: NextRequest, { params }: { params: { id: string; 
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error updating room image:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error updating room image",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 }
 
 // DELETE /api/admin/rooms/[roomId]/images/[imageId]
-export const DELETE = async (req: NextRequest, { params }: { params: { roomId: string; imageId: string } }) => {
+export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ roomId: string; imageId: string }> }) => {
     try {
         requireAdminAuth(req);
+        const {roomId,imageId} = await params
+        const RoomId = parseInt(roomId);
+        const imgId = parseInt(imageId);
 
-        const roomId = parseInt(params.roomId);
-        const imageId = parseInt(params.imageId);
-
-        if (isNaN(roomId) || isNaN(imageId)) {
+        if (isNaN(RoomId) || isNaN(imgId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid room ID or image ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         // Verify room exists and is not deleted
         const room = await prisma.room.findUnique({
-            where: { id: roomId, isDeleted: false },
+            where: {id: RoomId, isDeleted: false},
             select: {
                 id: true,
                 roomNumber: true,
@@ -264,15 +264,15 @@ export const DELETE = async (req: NextRequest, { params }: { params: { roomId: s
                 success: false,
                 message: "Room not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         // Verify image exists and belongs to the room
         const existingImage = await prisma.roomImage.findUnique({
             where: {
-                id: imageId,
-                roomId: roomId
+                id: imgId,
+                roomId: RoomId
             },
             select: {
                 id: true,
@@ -285,8 +285,8 @@ export const DELETE = async (req: NextRequest, { params }: { params: { roomId: s
                 success: false,
                 message: "Room image not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         // Optional: Prevent deletion if it's the only image (business rule)
@@ -303,7 +303,7 @@ export const DELETE = async (req: NextRequest, { params }: { params: { roomId: s
         */
 
         await prisma.roomImage.delete({
-            where: { id: imageId }
+            where: {id: imgId}
         });
 
         return NextResponse.json<ApiResponse<{ message: string }>>({
@@ -320,16 +320,16 @@ export const DELETE = async (req: NextRequest, { params }: { params: { roomId: s
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error deleting room image:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error deleting room image",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 }

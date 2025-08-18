@@ -1,29 +1,24 @@
 import { notFound } from "next/navigation";
-import axios from "axios";
 import { RoomWithDetails } from "@/types/roomTypes";
 import ClientRoomDetail from "./clientRoomDetailPage";
 
 async function fetchRoom(roomId: string): Promise<RoomWithDetails> {
-    try {
-        console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`);
 
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`);
-        if (!response.data.success) {
-            throw new Error(response.data.message || "Failed to fetch room");
-        }
-        return response.data.data;
-    } catch {
-        throw new Error("Room not found");
-    }
+    if (!res.ok) notFound(); // throws 404
+
+    const data = await res.json();
+    if (!data.success) notFound(); // throws 404
+
+    return data.data;
 }
 
-export default async function RoomDetailPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+interface RoomPageProps {
+    params: Promise<{ id: string }>; // Updated to use Promise
+}
 
-    try {
-        const room = await fetchRoom(id);
-        return <ClientRoomDetail room={room} />;
-    } catch {
-        notFound();
-    }
+export default async function RoomDetailPage({ params }: RoomPageProps) {
+    const { id } = await params; // Await the params to get the id
+    const room = await fetchRoom(id);
+    return <ClientRoomDetail room={room} />;
 }

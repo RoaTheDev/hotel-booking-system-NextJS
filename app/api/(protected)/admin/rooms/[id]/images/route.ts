@@ -1,10 +1,10 @@
 // /api/admin/rooms/[Imageid]/images/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { prismaClient as prisma } from "@/lib/prismaClient";
-import { HttpStatusCode } from "axios";
-import { ApiErrorResponse, ApiResponse } from "@/types/commonTypes";
-import { AuthError, requireAdminAuth } from "@/middleware/auth";
-import { z } from "zod";
+import {NextRequest, NextResponse} from "next/server";
+import {prismaClient as prisma} from "@/lib/prismaClient";
+import {HttpStatusCode} from "axios";
+import {ApiErrorResponse, ApiResponse} from "@/types/commonTypes";
+import {AuthError, requireAdminAuth} from "@/middleware/auth";
+import {z} from "zod";
 
 interface RoomImage {
     id: number;
@@ -15,24 +15,25 @@ interface RoomImage {
 }
 
 // GET /api/admin/rooms/[Imageid]/images
-export const GET = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
+        const {id} = await params
 
-        const roomId = parseInt(params.id);
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid room ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         // Verify room exists
         const room = await prisma.room.findUnique({
-            where: { id: roomId, isDeleted: false },
-            select: { id: true }
+            where: {id: roomId, isDeleted: false},
+            select: {id: true}
         });
 
         if (!room) {
@@ -40,13 +41,13 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string }
                 success: false,
                 message: "Room not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         const images = await prisma.roomImage.findMany({
-            where: { roomId },
-            orderBy: { createdAt: 'asc' }
+            where: {roomId},
+            orderBy: {createdAt: 'asc'}
         });
 
         return NextResponse.json<ApiResponse<RoomImage[]>>({
@@ -61,17 +62,17 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string }
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error fetching room images:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error fetching room images",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 }
 
@@ -86,18 +87,18 @@ interface AddRoomImageRequest {
 }
 
 // POST /api/admin/rooms/[Imageid]/images
-export const POST = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const POST = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} = await params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
                 message: "Invalid room ID",
                 data: null,
-                errors: { type: "ValidationError" },
-            }, { status: HttpStatusCode.BadRequest });
+                errors: {type: "ValidationError"},
+            }, {status: HttpStatusCode.BadRequest});
         }
 
         const body: AddRoomImageRequest = await req.json();
@@ -111,15 +112,15 @@ export const POST = async (req: NextRequest, { params }: { params: { id: string 
                 errors: {
                     type: "ValidationError",
                 },
-            }, { status: HttpStatusCode.BadRequest });
+            }, {status: HttpStatusCode.BadRequest});
         }
 
-        const { imageUrl, caption } = validationResult.data;
+        const {imageUrl, caption} = validationResult.data;
 
         // Verify room exists and is not deleted
         const room = await prisma.room.findUnique({
-            where: { id: roomId, isDeleted: false },
-            select: { id: true, roomNumber: true }
+            where: {id: roomId, isDeleted: false},
+            select: {id: true, roomNumber: true}
         });
 
         if (!room) {
@@ -127,8 +128,8 @@ export const POST = async (req: NextRequest, { params }: { params: { id: string 
                 success: false,
                 message: "Room not found",
                 data: null,
-                errors: { type: "NotFoundError" },
-            }, { status: HttpStatusCode.NotFound });
+                errors: {type: "NotFoundError"},
+            }, {status: HttpStatusCode.NotFound});
         }
 
         // Check if image URL already exists for this room
@@ -144,8 +145,8 @@ export const POST = async (req: NextRequest, { params }: { params: { id: string 
                 success: false,
                 message: "Image URL already exists for this room",
                 data: null,
-                errors: { type: "ConflictError" },
-            }, { status: HttpStatusCode.Conflict });
+                errors: {type: "ConflictError"},
+            }, {status: HttpStatusCode.Conflict});
         }
 
         const newImage = await prisma.roomImage.create({
@@ -160,7 +161,7 @@ export const POST = async (req: NextRequest, { params }: { params: { id: string 
             success: true,
             message: "Room image added successfully",
             data: newImage,
-        }, { status: HttpStatusCode.Created });
+        }, {status: HttpStatusCode.Created});
 
     } catch (err) {
         if (err instanceof AuthError) {
@@ -168,17 +169,17 @@ export const POST = async (req: NextRequest, { params }: { params: { id: string 
                 success: false,
                 message: err.message,
                 data: null,
-                errors: { type: "AuthError" },
-            }, { status: err.statusCode });
+                errors: {type: "AuthError"},
+            }, {status: err.statusCode});
         }
 
         console.error("Error adding room image:", err);
         return NextResponse.json<ApiResponse<ApiErrorResponse>>({
-            errors: { type: "ServerError" },
+            errors: {type: "ServerError"},
             data: null,
             success: false,
             message: "Error adding room image",
-        }, { status: HttpStatusCode.InternalServerError });
+        }, {status: HttpStatusCode.InternalServerError});
     }
 }
 

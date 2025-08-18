@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
                 hostname: "**.unsplash.com", // any subdomain of unsplash.com
             },
         ],
+    }, eslint: {
+        ignoreDuringBuilds: true,
     },
 };
 

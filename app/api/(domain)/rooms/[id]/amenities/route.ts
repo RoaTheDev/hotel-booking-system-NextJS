@@ -11,15 +11,13 @@ const RoomAmenitySchema = z.object({
     amenityIds: z.array(z.number().int().positive()),
 });
 
-interface RouteParams {
-    params: { id: string };
-}
 
-export const POST = async (req: NextRequest, { params }: RouteParams) => {
+
+export const POST = async (req: NextRequest,context:{ params: Promise<{ id: string }>} ) => {
     try {
         requireAdminAuth(req);
-
-        const roomId = parseInt(params.id);
+        const {id} =  await context.params
+        const roomId = parseInt(id);
         if (isNaN(roomId)) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,

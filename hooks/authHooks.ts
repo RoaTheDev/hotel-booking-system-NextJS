@@ -20,8 +20,11 @@ export const useSignup = () => {
 
 export const useLogout = () => {
     const logout = useAuthStore((state) => state.logout);
+
     return useMutation({
-        mutationFn: () => logout(),
+        mutationFn: async () => {
+            await logout()
+        },
     });
 };
 
