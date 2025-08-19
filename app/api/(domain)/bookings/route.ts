@@ -41,7 +41,7 @@ export interface BookingsResponse {
 
 export const GET = async (req: NextRequest) => {
     try {
-        requireAuth(req)
+        const currentUser = requireAuth(req); // Returns AuthUser directly
         const {searchParams} = new URL(req.url);
         const queryParams = Object.fromEntries(searchParams.entries());
 
@@ -56,15 +56,33 @@ export const GET = async (req: NextRequest) => {
         } = BookingQuerySchema.parse(queryParams);
 
         const skip = (page - 1) * limit;
-
         const where: BookingWhereInput = {};
 
-        if (status !== "ALL") {
-            where.status = status as BookingStatus;
+        // Authorization Logic: Restrict access based on user role
+        if (currentUser.role === Role.GUEST) {
+            // Guests can only see their own bookings
+            where.userId = currentUser.userId;
+
+            // If userId is provided in query and it's different from current user, deny access
+            if (userId && userId !== currentUser.userId) {
+                return NextResponse.json<ApiResponse<ApiErrorResponse>>({
+                    success: false,
+                    message: "Access denied. You can only view your own bookings.",
+                    data: null,
+                    errors: {type: "AuthorizationError"},
+                }, {status: HttpStatusCode.Forbidden});
+            }
+        } else if (currentUser.role === Role.ADMIN || currentUser.role === Role.STAFF) {
+            // Admin and staff can filter by userId if provided
+            if (userId) {
+                where.userId = userId;
+            }
+            // Otherwise, they can see all bookings (no additional where clause needed)
         }
 
-        if (userId) {
-            where.userId = userId;
+        // Apply other filters
+        if (status !== "ALL") {
+            where.status = status as BookingStatus;
         }
 
         if (roomId) {
@@ -126,34 +144,40 @@ export const GET = async (req: NextRequest) => {
                 take: limit,
             }),
             prisma.booking.count({where}),
-            prisma.user.findMany({
-                where: {
-                    isDeleted: false,
-                    role: Role.GUEST
-                },
-                select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                    phone: true
-                }
-            }),
-            prisma.room.findMany({
-                where: {
-                    isActive: true,
-                    isDeleted: false
-                },
-                include: {
-                    roomType: {
-                        select: {
-                            id: true,
-                            name: true,
-                            basePrice: true
+            // Only return users list for admin/staff
+            currentUser.role === Role.ADMIN || currentUser.role === Role.STAFF
+                ? prisma.user.findMany({
+                    where: {
+                        isDeleted: false,
+                        role: Role.GUEST
+                    },
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        phone: true
+                    }
+                })
+                : Promise.resolve([]),
+            // Only return rooms list for admin/staff
+            currentUser.role === Role.ADMIN || currentUser.role === Role.STAFF
+                ? prisma.room.findMany({
+                    where: {
+                        isActive: true,
+                        isDeleted: false
+                    },
+                    include: {
+                        roomType: {
+                            select: {
+                                id: true,
+                                name: true,
+                                basePrice: true
+                            }
                         }
                     }
-                }
-            })
+                })
+                : Promise.resolve([])
         ]);
 
         const bookingsWithDetails = bookings.map((booking) => ({
@@ -182,7 +206,7 @@ export const GET = async (req: NextRequest) => {
             rooms: Room[];
         }>>({
             success: true,
-            message: "Bookings, users, and rooms retrieved successfully",
+            message: "Bookings retrieved successfully",
             data: {
                 bookings: bookingsWithDetails,
                 pagination: {
@@ -215,7 +239,7 @@ export const GET = async (req: NextRequest) => {
         if (err instanceof ZodError) {
             return NextResponse.json<ApiResponse<ApiErrorResponse>>({
                 success: false,
-                message: "Invalid hooks parameters",
+                message: "Invalid query parameters",
                 data: null,
                 errors: validationErrorFormat(err),
             }, {status: HttpStatusCode.BadRequest});

@@ -11,7 +11,7 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
 import {Checkbox} from '@/components/ui/checkbox';
-import {AlertCircle, Edit, Eye, ImagesIcon, Loader2, Plus, Trash2, X} from 'lucide-react';
+import {AlertCircle, Edit, Eye, ImagesIcon, Loader2, Plus, Trash2} from 'lucide-react';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import axios from 'axios';
@@ -1015,10 +1015,7 @@ export default function RoomManagement() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center justify-between">
                             Image Preview
-                            <Button variant="ghost" size="sm" onClick={() => setPreviewImageUrl(null)}
-                                    className="text-slate-400 hover:text-slate-200">
-                                <X className="h-4 w-4"/>
-                            </Button>
+
                         </DialogTitle>
                     </DialogHeader>
 
