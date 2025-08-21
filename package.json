@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "NEXT_PUBLIC_ESLINT_DISABLE=true next build",
+    "build": "prisma generate && NEXT_PUBLIC_ESLINT_DISABLE=true next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "dotenv -e .env.local -- prisma generate",
