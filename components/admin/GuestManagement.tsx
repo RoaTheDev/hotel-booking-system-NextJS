@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useState} from "react"
-import {Edit, Mail, Phone, Plus, Search, Shield, User, Users} from "lucide-react"
+import {Edit, Eye, EyeOff, Mail, Phone, Plus, Shield, User, Users} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
@@ -22,6 +22,8 @@ import {z} from "zod"
 import {toast} from "sonner"
 import {Role} from "@/app/generated/prisma"
 import {UpdateUserRequest} from "@/app/api/(protected)/user/[id]/route";
+import {SearchInput} from "@/components/common/SearchInput";
+import {useDebounce} from "@/hooks/useDebounce";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
     state = {hasError: false}
@@ -98,6 +100,8 @@ interface GuestEditData {
 
 export function GuestManagement() {
     const [searchTerm, setSearchTerm] = useState<string>("")
+    const [showPassword, setShowPassword] = useState<boolean>(false)
+    const debouncedSearchTerm = useDebounce(searchTerm, 300)
     const [includeDeleted, setIncludeDeleted] = useState<boolean>(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -123,14 +127,14 @@ export function GuestManagement() {
 
 
     const {data: guestsData, isLoading: guestsLoading, error: guestsError} = useQuery<GuestsResponse>({
-        queryKey: ['guests', currentPage, searchTerm, includeDeleted],
+        queryKey: ['guests', currentPage, debouncedSearchTerm, includeDeleted],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: '10',
                 role: Role.GUEST,
             })
-            if (searchTerm) params.append('search', searchTerm)
+            if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
             if (includeDeleted) params.append('includeDeleted', 'true')
 
             const response = await axios.get(`/api/user/secure?${params}`)
@@ -351,17 +355,28 @@ export function GuestManagement() {
                                             onChange={(e) => setFormData({...formData, email: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Enter email address"
+                                            autoComplete="email"
                                         />
                                     </div>
                                     <div>
                                         <Label className="text-slate-300 mb-2 block font-light">Password *</Label>
+                                        <div className="relative">
+
                                         <Input
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             value={formData.password}
                                             onChange={(e) => setFormData({...formData, password: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Enter password (min 6 characters)"
-                                        />
+                                            autoComplete="new-password"
+                                        />  <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors duration-300"
+                                    >
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                        </div>
                                     </div>
                                     <div>
                                         <Label className="text-slate-300 mb-2 block font-light">Phone</Label>
@@ -397,19 +412,7 @@ export function GuestManagement() {
 
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="col-span-2">
-                            <Label className="text-slate-300 mb-2 block font-light">Search Guests</Label>
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"/>
-                                <Input
-                                    placeholder="Search by name or email..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-300"
-                                />
-                            </div>
-                        </div>
+                        <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} debouncedSearchTerm={debouncedSearchTerm} />
                         <div>
                             <Label className="text-slate-300 mb-2 block font-light">Include Deleted</Label>
                             <Button

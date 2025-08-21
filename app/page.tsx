@@ -107,13 +107,13 @@ export default function HomePage() {
                 if (!icon || !content) return;
 
                 card.addEventListener("mouseenter", () => {
-                    gsap.to(icon, { scale: 1.2, rotation: 10, duration: 0.3, ease: "back.out(1.7)" });
-                    gsap.to(content, { y: -5, duration: 0.3, ease: "power2.out" });
+                    gsap.to(icon, {scale: 1.2, rotation: 10, duration: 0.3, ease: "back.out(1.7)"});
+                    gsap.to(content, {y: -5, duration: 0.3, ease: "power2.out"});
                 });
 
                 card.addEventListener("mouseleave", () => {
-                    gsap.to(icon, { scale: 1, rotation: 0, duration: 0.3, ease: "power2.out" });
-                    gsap.to(content, { y: 0, duration: 0.3, ease: "power2.out" });
+                    gsap.to(icon, {scale: 1, rotation: 0, duration: 0.3, ease: "power2.out"});
+                    gsap.to(content, {y: 0, duration: 0.3, ease: "power2.out"});
                 });
             });
 
@@ -143,15 +143,15 @@ export default function HomePage() {
                 if (!image || !content) return;
 
                 card.addEventListener("mouseenter", () => {
-                    gsap.to(card, { y: -10, duration: 0.4, ease: "power2.out" });
-                    gsap.to(image, { scale: 1.1, duration: 0.6, ease: "power2.out" });
-                    gsap.to(content, { y: -5, duration: 0.3, ease: "power2.out" });
+                    gsap.to(card, {y: -10, duration: 0.4, ease: "power2.out"});
+                    gsap.to(image, {scale: 1.1, duration: 0.6, ease: "power2.out"});
+                    gsap.to(content, {y: -5, duration: 0.3, ease: "power2.out"});
                 });
 
                 card.addEventListener("mouseleave", () => {
-                    gsap.to(card, { y: 0, duration: 0.4, ease: "power2.out" });
-                    gsap.to(image, { scale: 1, duration: 0.6, ease: "power2.out" });
-                    gsap.to(content, { y: 0, duration: 0.3, ease: "power2.out" });
+                    gsap.to(card, {y: 0, duration: 0.4, ease: "power2.out"});
+                    gsap.to(image, {scale: 1, duration: 0.6, ease: "power2.out"});
+                    gsap.to(content, {y: 0, duration: 0.3, ease: "power2.out"});
                 });
             });
 
@@ -288,13 +288,13 @@ export default function HomePage() {
 
                         <div className="feature-card text-center group ">
 
-                        <Link href={"/garden"}>
-                            <div
-                                className="cursor-pointer feature-icon w-20 h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20 group-hover:border-amber-400/50 transition-all duration-300">
+                            <Link href={"/garden"}>
                                 <div
-                                    className="w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full"></div>
-                            </div>
-                        </Link>
+                                    className="cursor-pointer feature-icon w-20 h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20 group-hover:border-amber-400/50 transition-all duration-300">
+                                    <div
+                                        className="w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full"></div>
+                                </div>
+                            </Link>
 
                             <div className="feature-content">
                                 <h3 className="text-xl font-light text-slate-100 mb-4 tracking-wide">Zen Gardens</h3>
@@ -345,7 +345,7 @@ export default function HomePage() {
                             className="room-card  shadow-2xl overflow-hidden bg-slate-800/50 backdrop-blur-sm hover:shadow-amber-500/10 transition-all duration-500 border border-slate-700/50">
                             <div className="relative h-64 overflow-hidden">
                                 <Image
-                                    src="/placeholder.svg?height=400&width=600&text=Dark traditional tatami room with mountain view"
+                                    src="/yamazakura.jpg"
                                     alt="Mountain Cherry room"
                                     fill
                                     className="room-image object-cover"
@@ -364,15 +364,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$280</span>
-                                    <Link href="/app/(additional-info)/rooms/yamazakura">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
-                                        >
-                                            View Room
-                                        </Button>
-                                    </Link>
+
                                 </div>
                             </CardContent>
                         </Card>
@@ -381,7 +373,7 @@ export default function HomePage() {
                             className="room-card  shadow-2xl overflow-hidden bg-slate-800/50 backdrop-blur-sm hover:shadow-amber-500/10 transition-all duration-500 border border-slate-700/50">
                             <div className="relative h-64 overflow-hidden">
                                 <Image
-                                    src="/placeholder.svg?height=400&width=600&text=Dark traditional room with mountain view and private onsen"
+                                    src="/tsukimi.jpg"
                                     alt="Moon Viewing suite"
                                     fill
                                     className="room-image object-cover"
@@ -398,15 +390,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$450</span>
-                                    <Link href="/app/(additional-info)/rooms/tsukimi">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
-                                        >
-                                            View Room
-                                        </Button>
-                                    </Link>
+
                                 </div>
                             </CardContent>
                         </Card>
@@ -415,7 +399,7 @@ export default function HomePage() {
                             className="room-card shadow-2xl overflow-hidden bg-slate-800/50 backdrop-blur-sm hover:shadow-amber-500/10 transition-all duration-500 border border-slate-700/50">
                             <div className="relative h-64 overflow-hidden">
                                 <Image
-                                    src="/placeholder.svg?height=400&width=600&text=Dark lakeside traditional room with wooden deck"
+                                    src="/mizukagami.jpg"
                                     alt="Water Mirror pavilion"
                                     fill
                                     className="room-image object-cover"
@@ -432,15 +416,7 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-light text-amber-400">$520</span>
-                                    <Link href="/app/(additional-info)/rooms/mizukagami">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 bg-transparent transition-all duration-300"
-                                        >
-                                            View Room
-                                        </Button>
-                                    </Link>
+
                                 </div>
                             </CardContent>
                         </Card>
@@ -466,17 +442,10 @@ export default function HomePage() {
                         className="w-16 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mb-8"></div>
                     <p className="text-xl leading-relaxed font-light mb-12 max-w-3xl mx-auto text-slate-300">
                         {"Peace comes not from the absence of noise, but from finding stillness within. Let our mountain" +
-                        "inn be your" +
-                        "refuge from the world's demands, where ancient wisdom meets modern comfort."}
+                            "inn be your" +
+                            "refuge from the world's demands, where ancient wisdom meets modern comfort."}
                     </p>
-                    <Link href="/experience">
-                        <Button
-                            size="lg"
-                            className="bg-slate-800/50 backdrop-blur-sm border border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400 px-12 py-4 text-lg font-light tracking-wide transition-all duration-500 hover:scale-110 hover:shadow-lg hover:shadow-amber-400/25"
-                        >
-                            Discover Our Way
-                        </Button>
-                    </Link>
+
                 </div>
             </section>
 
@@ -538,7 +507,7 @@ export default function HomePage() {
                                     <br/>
                                     Peaceful Valley, Colorado
                                 </p>
-                                <p>+1 (555) 123-4567</p>
+                                <p>+855 973-061-501</p>
                                 <p>info@tranquility-inn.com</p>
                             </div>
                         </div>
@@ -547,6 +516,7 @@ export default function HomePage() {
                     <div className="border-t border-slate-700 mt-12 pt-8 text-center">
                         <p className="text-slate-400 font-light">© 2024 Tranquility Inn. Preserving tradition, nurturing
                             peace.</p>
+                        <p>Roern Chamreun (ROA)</p>
                     </div>
                 </div>
             </footer>

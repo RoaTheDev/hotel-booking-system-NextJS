@@ -129,8 +129,8 @@ const createUserSchema = z.object({
     firstName: z.string().min(1, "First name is required").max(100, "First name too long"),
     lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
     phone: z.string().max(20, "Phone number too long").optional().nullable(),
-    role: z.enum([Role.STAFF, Role.ADMIN], {
-        errorMap: () => ({message: "Role must be STAFF or ADMIN"})
+    role: z.enum([Role.STAFF, Role.ADMIN, Role.GUEST], {
+        errorMap: () => ({message: "Role must be STAFF, ADMIN, or GUEST"})
     })
 });
 

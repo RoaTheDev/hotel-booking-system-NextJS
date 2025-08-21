@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useState} from "react"
-import {Calendar, DollarSign, Edit, Home, Plus, Search, Trash2, User, Users} from "lucide-react"
+import {Calendar, DollarSign, Edit, Home, Plus, Trash2, User, Users} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
@@ -25,6 +25,8 @@ import {BookingWithDetails} from "@/types/roomTypes"
 import {toast} from "sonner"
 import {BookingStatusUpdateType} from "@/app/api/(domain)/bookings/[id]/route"
 import {BookingStatus} from "@/app/generated/prisma"
+import {SearchInput} from "@/components/common/SearchInput";
+import {useDebounce} from "@/hooks/useDebounce";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
     state = {hasError: false}
@@ -92,6 +94,7 @@ interface BookingsResponse {
 
 export function BookingManagement() {
     const [searchTerm, setSearchTerm] = useState<string>("")
+    const debouncedSearchTerm = useDebounce(searchTerm, 300)
     const [statusFilter, setStatusFilter] = useState<string>("ALL")
     const [startDate, setStartDate] = useState<Date | null>(null)
     const [endDate, setEndDate] = useState<Date | null>(null)
@@ -118,14 +121,14 @@ export function BookingManagement() {
 
     // Fetch bookings
     const {data: bookingsData, isLoading: bookingsLoading, error: bookingsError} = useQuery<BookingsResponse>({
-        queryKey: ['bookings', currentPage, statusFilter, searchTerm, startDate, endDate],
+        queryKey: ['bookings', currentPage, statusFilter, debouncedSearchTerm, startDate, endDate],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: '10',
             })
             if (statusFilter && statusFilter !== 'ALL') params.append('status', statusFilter)
-            if (searchTerm) params.append('search', searchTerm)
+            if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
             if (startDate) params.append('checkIn', startDate.toISOString())
             if (endDate) params.append('checkOut', endDate.toISOString())
             const response = await axios.get(`/api/bookings?${params}`)
@@ -342,7 +345,7 @@ export function BookingManagement() {
                                                 >
                                                     <SelectTrigger
                                                         className="bg-slate-700/50 border-slate-600 text-slate-100">
-                                                        <SelectValue placeholder="Select guest (defaults to admin)"/>
+                                                        <SelectValue placeholder="Select guest"/>
                                                     </SelectTrigger>
                                                     <SelectContent className="bg-slate-800 border-slate-700">
                                                         {users.map((user) => (
@@ -460,19 +463,8 @@ export function BookingManagement() {
 
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                        <div className="col-span-2">
-                            <Label className="text-slate-300 mb-2 block font-light">Search Bookings</Label>
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"/>
-                                <Input
-                                    placeholder="Search by guest name or booking ID..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-300"
-                                />
-                            </div>
-                        </div>
+                        <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                                     debouncedSearchTerm={debouncedSearchTerm}/>
                         <div>
                             <Label className="text-slate-300 mb-2 block font-light">Status Filter</Label>
                             <Select value={statusFilter} onValueChange={setStatusFilter}>

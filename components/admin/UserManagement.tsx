@@ -1,28 +1,30 @@
 'use client'
 
-import React, {useState} from "react"
-import {Edit, Mail, Phone, Plus, Search, Shield, User, Users} from "lucide-react"
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
-import {Badge} from "@/components/ui/badge"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
+import React, {useCallback} from 'react'
+import {Edit, Eye, EyeOff, Mail, Phone, Plus, Shield, User, Users} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog"
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
-import axios from "axios"
-import {z} from "zod"
-import {toast} from "sonner"
-import {Role} from "@/app/generated/prisma"
-import {UpdateUserRequest} from "@/app/api/(protected)/user/[id]/route";
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import axios from 'axios'
+import {z} from 'zod'
+import {toast} from 'sonner'
+import {Role} from '@/app/generated/prisma'
+import {UpdateUserRequest} from '@/app/api/(protected)/user/[id]/route'
+import {useDebounce} from '@/hooks/useDebounce'
+import {SearchInput} from "@/components/common/SearchInput";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
     state = {hasError: false}
@@ -40,26 +42,26 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const UserCreateSchema = z.object({
-    email: z.string().email("Invalid email format").max(255, "Email too long"),
-    password: z.string().min(6, "Password must be at least 6 characters").max(100, "Password too long"),
-    firstName: z.string().min(1, "First name is required").max(100, "First name too long"),
-    lastName: z.string().min(1, "Last name is required").max(100, "Last name too long"),
-    phone: z.string().max(20, "Phone number too long").optional().nullable(),
+    email: z.string().email('Invalid email format').max(255, 'Email too long'),
+    password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long'),
+    firstName: z.string().min(1, 'First name is required').max(100, 'First name too long'),
+    lastName: z.string().min(1, 'Last name is required').max(100, 'Last name too long'),
+    phone: z.string().max(20, 'Phone number too long').optional().nullable(),
     role: z.enum([Role.STAFF, Role.ADMIN], {
-        errorMap: () => ({message: "Role must be STAFF or ADMIN"})
-    })
+        errorMap: () => ({message: 'Role must be STAFF or ADMIN'}),
+    }),
 })
 
 const UserUpdateSchema = z.object({
-    email: z.string().email("Invalid email format").max(255, "Email too long").optional(),
-    password: z.string().min(6, "Password must be at least 6 characters").max(100, "Password too long").optional(),
-    firstName: z.string().min(1, "First name is required").max(100, "First name too long").optional(),
-    lastName: z.string().min(1, "Last name is required").max(100, "Last name too long").optional(),
-    phone: z.string().max(20, "Phone number too long").nullable().optional(),
+    email: z.string().email('Invalid email format').max(255, 'Email too long').optional(),
+    password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long').optional(),
+    firstName: z.string().min(1, 'First name is required').max(100, 'First name too long').optional(),
+    lastName: z.string().min(1, 'Last name is required').max(100, 'Last name too long').optional(),
+    phone: z.string().max(20, 'Phone number too long').nullable().optional(),
     role: z.enum([Role.STAFF, Role.ADMIN], {
-        errorMap: () => ({message: "Role must be STAFF or ADMIN"})
+        errorMap: () => ({message: 'Role must be STAFF or ADMIN'}),
     }).optional(),
-    isDeleted: z.boolean().optional()
+    isDeleted: z.boolean().optional(),
 })
 
 interface UserInternal {
@@ -95,27 +97,29 @@ interface UserFormData {
 
 
 export function UserManagement() {
-    const [searchTerm, setSearchTerm] = useState<string>("")
-    const [roleFilter, setRoleFilter] = useState<string>("ALL")
-    const [includeDeleted, setIncludeDeleted] = useState<boolean>(false)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [selectedUser, setSelectedUser] = useState<UserInternal | null>(null)
-    const [formData, setFormData] = useState<UserFormData>({
-        email: "",
-        password: "",
-        firstName: "",
-        lastName: "",
-        phone: "",
+    const [searchTerm, setSearchTerm] = React.useState<string>('')
+    const debouncedSearchTerm = useDebounce(searchTerm, 300)
+    const [showPassword, setShowPassword] = React.useState<boolean>(false)
+    const [roleFilter, setRoleFilter] = React.useState<string>('ALL')
+    const [includeDeleted, setIncludeDeleted] = React.useState<boolean>(false)
+    const [currentPage, setCurrentPage] = React.useState(1)
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
+    const [selectedUser, setSelectedUser] = React.useState<UserInternal | null>(null)
+    const [formData, setFormData] = React.useState<UserFormData>({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
         role: Role.STAFF,
     })
-    const [editData, setEditData] = useState<UpdateUserRequest>({
-        email: "",
-        passwordHash: "",
-        firstName: "",
-        lastName: "",
-        phone: "",
+    const [editData, setEditData] = React.useState<UpdateUserRequest>({
+        email: '',
+        passwordHash: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
         role: Role.STAFF,
         isDeleted: false,
     })
@@ -124,14 +128,14 @@ export function UserManagement() {
 
     // Fetch users
     const {data: usersData, isLoading: usersLoading, error: usersError} = useQuery<UsersResponse>({
-        queryKey: ['users', currentPage, roleFilter, searchTerm, includeDeleted],
+        queryKey: ['users', currentPage, roleFilter, debouncedSearchTerm, includeDeleted],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: '10',
             })
             if (roleFilter && roleFilter !== 'ALL') params.append('role', roleFilter)
-            if (searchTerm) params.append('search', searchTerm)
+            if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
             if (includeDeleted) params.append('includeDeleted', 'true')
 
             const response = await axios.get(`/api/user/secure?${params}`)
@@ -142,7 +146,7 @@ export function UserManagement() {
 
     const createUserMutation = useMutation({
         mutationFn: async (data: z.infer<typeof UserCreateSchema>) => {
-            console.log("Submitting user data:", data)
+            console.log('Submitting user data:', data)
             const response = await axios.post('/api/user/secure', data)
             return response.data
         },
@@ -150,16 +154,16 @@ export function UserManagement() {
             await queryClient.invalidateQueries({queryKey: ['users']})
             setIsCreateModalOpen(false)
             resetForm()
-            toast.success("User created successfully")
+            toast.success('User created successfully')
         },
         onError: (error) => {
-            toast.error(error.message || error.message || "Failed to create user")
+            toast.error(error.message || 'Failed to create user')
         },
     })
 
     const updateUserMutation = useMutation({
-        mutationFn: async ({id, data}: { id: number, data: z.infer<typeof UserUpdateSchema> }) => {
-            console.log("Updating user ID:", id, "with data:", data)
+        mutationFn: async ({id, data}: { id: number; data: z.infer<typeof UserUpdateSchema> }) => {
+            console.log('Updating user ID:', id, 'with data:', data)
             const response = await axios.put(`/api/user/${id}`, data)
             return response.data
         },
@@ -167,39 +171,38 @@ export function UserManagement() {
             await queryClient.invalidateQueries({queryKey: ['users']})
             setIsEditModalOpen(false)
             setSelectedUser(null)
-            toast.success("User updated successfully")
+            toast.success('User updated successfully')
         },
         onError: (error) => {
-            toast.error(error.message || error.message || "Failed to update user")
+            toast.error(error.message || 'Failed to update user')
         },
     })
 
-
     const resetForm = () => {
         setFormData({
-            email: "",
-            password: "",
-            firstName: "",
-            lastName: "",
-            phone: "",
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            phone: '',
             role: Role.STAFF,
         })
     }
 
     const resetEditForm = () => {
         setEditData({
-            email: "",
-            passwordHash: "",
-            firstName: "",
-            lastName: "",
-            phone: "",
+            email: '',
+            passwordHash: '',
+            firstName: '',
+            lastName: '',
+            phone: '',
             role: Role.STAFF,
             isDeleted: false,
         })
     }
 
     const handleCreateUser = () => {
-        console.log("Form data before submission:", formData)
+        console.log('Form data before submission:', formData)
         try {
             const userData = UserCreateSchema.parse({
                 email: formData.email,
@@ -212,11 +215,11 @@ export function UserManagement() {
             createUserMutation.mutate(userData)
         } catch (error) {
             if (error instanceof z.ZodError) {
-                console.error("Validation errors:", error.errors)
+                console.error('Validation errors:', error.errors)
                 toast.error(error.errors[0].message)
             } else {
-                console.error("Unexpected error:", error)
-                toast.error("An unexpected error occurred")
+                console.error('Unexpected error:', error)
+                toast.error('An unexpected error occurred')
             }
         }
     }
@@ -225,10 +228,10 @@ export function UserManagement() {
         setSelectedUser(user)
         setEditData({
             email: user.email,
-            passwordHash: "",
+            passwordHash: '',
             firstName: user.firstName,
             lastName: user.lastName,
-            phone: user.phone || "",
+            phone: user.phone || '',
             role: user.role as Role,
             isDeleted: user.isDeleted,
         })
@@ -237,7 +240,7 @@ export function UserManagement() {
 
     const handleUpdateUser = () => {
         if (!selectedUser) {
-            console.error("No user selected for update")
+            console.error('No user selected for update')
             return
         }
         try {
@@ -258,35 +261,35 @@ export function UserManagement() {
             updateUserMutation.mutate({id: selectedUser.id, data: validatedData})
         } catch (error) {
             if (error instanceof z.ZodError) {
-                console.error("Update validation errors:", error.errors)
+                console.error('Update validation errors:', error.errors)
                 toast.error(error.errors[0].message)
             } else {
-                console.error("Unexpected error:", error)
-                toast.error("An unexpected error occurred")
+                console.error('Unexpected error:', error)
+                toast.error('An unexpected error occurred')
             }
         }
     }
 
     const getRoleColor = (role: string): string => {
         switch (role.toUpperCase()) {
-            case "ADMIN":
-                return "bg-purple-500/20 text-purple-400 border-purple-500/30"
-            case "STAFF":
-                return "bg-blue-500/20 text-blue-400 border-blue-500/30"
-            case "GUEST":
-                return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+            case 'ADMIN':
+                return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+            case 'STAFF':
+                return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+            case 'GUEST':
+                return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
             default:
-                return "bg-slate-500/20 text-slate-400 border-slate-500/30"
+                return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
         }
     }
 
-    const formatDate = (date: Date | string) => {
+    const formatDate = useCallback((date: Date | string) => {
         return new Date(date).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
         })
-    }
+    }, [])
 
     const filteredUsers = usersData?.users || []
     const totalPages = usersData?.pagination?.totalPages || 1
@@ -318,14 +321,14 @@ export function UserManagement() {
                     <Dialog
                         open={isCreateModalOpen}
                         onOpenChange={(open) => {
-                            console.log("Create modal open state:", open)
+                            console.log('Create modal open state:', open)
                             setIsCreateModalOpen(open)
                             if (!open) resetForm()
                         }}
                     >
                         <DialogTrigger asChild>
                             <Button
-                                onClick={() => console.log("New User button clicked")}
+                                onClick={() => console.log('New User button clicked')}
                                 className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
                             >
                                 <Plus className="h-4 w-4"/>
@@ -369,17 +372,29 @@ export function UserManagement() {
                                             onChange={(e) => setFormData({...formData, email: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Enter email address"
+                                            autoComplete="email"
                                         />
                                     </div>
                                     <div>
                                         <Label className="text-slate-300 mb-2 block font-light">Password *</Label>
+                                        <div className={"relative"}>
+
                                         <Input
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             value={formData.password}
                                             onChange={(e) => setFormData({...formData, password: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Enter password (min 6 characters)"
+                                            autoComplete="new-password"
                                         />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors duration-300"
+                                            >
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
@@ -422,10 +437,16 @@ export function UserManagement() {
                                     </Button>
                                     <Button
                                         onClick={handleCreateUser}
-                                        disabled={createUserMutation.isPending || !formData.email || !formData.password || !formData.firstName || !formData.lastName}
+                                        disabled={
+                                            createUserMutation.isPending ||
+                                            !formData.email ||
+                                            !formData.password ||
+                                            !formData.firstName ||
+                                            !formData.lastName
+                                        }
                                         className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-slate-900"
                                     >
-                                        {createUserMutation.isPending ? "Creating..." : "Create User"}
+                                        {createUserMutation.isPending ? 'Creating...' : 'Create User'}
                                     </Button>
                                 </div>
                             </ErrorBoundary>
@@ -435,19 +456,11 @@ export function UserManagement() {
 
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="col-span-2">
-                            <Label className="text-slate-300 mb-2 block font-light">Search Users</Label>
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400"/>
-                                <Input
-                                    placeholder="Search by name or email..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-300"
-                                />
-                            </div>
-                        </div>
+                        <SearchInput
+                            searchTerm={searchTerm}
+                            setSearchTerm={setSearchTerm}
+                            debouncedSearchTerm={debouncedSearchTerm}
+                        />
                         <div>
                             <Label className="text-slate-300 mb-2 block font-light">Role Filter</Label>
                             <Select value={roleFilter} onValueChange={setRoleFilter}>
@@ -467,12 +480,13 @@ export function UserManagement() {
                             <Button
                                 variant="outline"
                                 onClick={() => setIncludeDeleted(!includeDeleted)}
-                                className={`w-full justify-start ${includeDeleted
-                                    ? 'border-red-500/30 text-red-400 hover:bg-red-500/10'
-                                    : 'border-slate-600 text-slate-300 hover:bg-slate-700/50'
+                                className={`w-full justify-start ${
+                                    includeDeleted
+                                        ? 'border-red-500/30 text-red-400 hover:bg-red-500/10'
+                                        : 'border-slate-600 text-slate-300 hover:bg-slate-700/50'
                                 }`}
                             >
-                                {includeDeleted ? "Hide Deleted" : "Show Deleted"}
+                                {includeDeleted ? 'Hide Deleted' : 'Show Deleted'}
                             </Button>
                         </div>
                     </div>
@@ -493,14 +507,18 @@ export function UserManagement() {
                             </TableHeader>
                             <TableBody>
                                 {filteredUsers.map((user: UserInternal) => (
-                                    <TableRow key={user.id}
-                                              className="border-slate-700/50 hover:bg-slate-700/20 transition-colors duration-200">
+                                    <TableRow
+                                        key={user.id}
+                                        className="border-slate-700/50 hover:bg-slate-700/20 transition-colors duration-200"
+                                    >
                                         <TableCell className="font-medium text-slate-200">#{user.id}</TableCell>
                                         <TableCell className="text-slate-300">
                                             <div className="flex items-center gap-2">
                                                 <User className="h-4 w-4 text-slate-400"/>
                                                 <div>
-                                                    <div>{user.firstName} {user.lastName}</div>
+                                                    <div>
+                                                        {user.firstName} {user.lastName}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -528,11 +546,14 @@ export function UserManagement() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge className={user.isDeleted
-                                                ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                                            }>
-                                                {user.isDeleted ? "Deleted" : "Active"}
+                                            <Badge
+                                                className={
+                                                    user.isDeleted
+                                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                                }
+                                            >
+                                                {user.isDeleted ? 'Deleted' : 'Active'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-slate-300">{formatDate(user.createdAt)}</TableCell>
@@ -558,18 +579,18 @@ export function UserManagement() {
                         <div className="flex justify-center gap-2 mt-6">
                             <Button
                                 variant="outline"
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
                                 className="border-slate-600 text-slate-300 hover:bg-slate-700/50"
                             >
                                 Previous
                             </Button>
                             <span className="flex items-center px-4 text-slate-300">
-                                Page {currentPage} of {totalPages}
-                            </span>
+                Page {currentPage} of {totalPages}
+              </span>
                             <Button
                                 variant="outline"
-                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
                                 className="border-slate-600 text-slate-300 hover:bg-slate-700/50"
                             >
@@ -584,7 +605,7 @@ export function UserManagement() {
             <Dialog
                 open={isEditModalOpen}
                 onOpenChange={(open) => {
-                    console.log("Edit modal open state:", open)
+                    console.log('Edit modal open state:', open)
                     setIsEditModalOpen(open)
                     if (!open) {
                         setSelectedUser(null)
@@ -632,13 +653,22 @@ export function UserManagement() {
                                     </div>
                                     <div>
                                         <Label className="text-slate-300 mb-2 block font-light">New Password</Label>
+                                        <div className="relative">
                                         <Input
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             value={editData.passwordHash}
                                             onChange={(e) => setEditData({...editData, passwordHash: e.target.value})}
                                             className="bg-slate-700/50 border-slate-600 text-slate-100"
                                             placeholder="Leave empty to keep current password"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors duration-300"
+                                        >
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
@@ -692,10 +722,15 @@ export function UserManagement() {
                                     </Button>
                                     <Button
                                         onClick={handleUpdateUser}
-                                        disabled={updateUserMutation.isPending || !editData.email || !editData.firstName || !editData.lastName}
+                                        disabled={
+                                            updateUserMutation.isPending ||
+                                            !editData.email ||
+                                            !editData.firstName ||
+                                            !editData.lastName
+                                        }
                                         className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-slate-900"
                                     >
-                                        {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                                        {updateUserMutation.isPending ? 'Updating...' : 'Update User'}
                                     </Button>
                                 </div>
                             </>

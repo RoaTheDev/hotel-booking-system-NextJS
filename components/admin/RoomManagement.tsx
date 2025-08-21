@@ -10,14 +10,12 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
-import {Checkbox} from '@/components/ui/checkbox';
 import {AlertCircle, Edit, Eye, ImagesIcon, Loader2, Plus, Trash2} from 'lucide-react';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import axios from 'axios';
 import Image from 'next/image';
 import {RoomTypeWithDetails} from '@/types/roomTypes';
-import {AmenityWithDetails} from '@/app/api/(protected)/admin/amenities/route';
 import {RoomInternal} from "@/app/api/(protected)/admin/rooms/route";
 import {Decimal} from '@prisma/client/runtime/library';
 
@@ -126,16 +124,16 @@ export default function RoomManagement() {
         });
 
 
-    const {data: amenities = [], isLoading: amenitiesLoading, error: amenitiesError} =
-        useQuery<AmenityWithDetails[]>({
-            queryKey: ['amenities'],
-            queryFn: async () => {
-                const response = await axios.get('/api/admin/amenities');
-                if (!response.data.success) return [];
-
-                return response.data.data.amenities ?? [];
-            },
-        });
+    // const {data: amenities = [], isLoading: amenitiesLoading, error: amenitiesError} =
+    //     useQuery<AmenityWithDetails[]>({
+    //         queryKey: ['amenities'],
+    //         queryFn: async () => {
+    //             const response = await axios.get('/api/admin/amenities');
+    //             if (!response.data.success) return [];
+    //
+    //             return response.data.data.amenities ?? [];
+    //         },
+    //     });
 
 
     const {data: roomImages = [], isLoading: imagesLoading, refetch: refetchImages} = useQuery<RoomImage[]>({
@@ -349,14 +347,14 @@ export default function RoomManagement() {
         }));
     };
 
-    const toggleAmenity = (amenityId: number) => {
-        setRoomForm(prev => ({
-            ...prev,
-            amenityIds: prev.amenityIds.includes(amenityId)
-                ? prev.amenityIds.filter(id => id !== amenityId)
-                : [...prev.amenityIds, amenityId],
-        }));
-    };
+    // const toggleAmenity = (amenityId: number) => {
+    //     setRoomForm(prev => ({
+    //         ...prev,
+    //         amenityIds: prev.amenityIds.includes(amenityId)
+    //             ? prev.amenityIds.filter(id => id !== amenityId)
+    //             : [...prev.amenityIds, amenityId],
+    //     }));
+    // };
 
     const addBulkImage = () => {
         setBulkImages(prev => [...prev, {imageUrl: '', caption: ''}]);
@@ -370,7 +368,9 @@ export default function RoomManagement() {
         setBulkImages(prev => prev.map((img, i) => (i === index ? {...img, [field]: value} : img)));
     };
 
-    if (roomsLoading || roomTypesLoading || amenitiesLoading) {
+    if (roomsLoading || roomTypesLoading
+        //|| amenitiesLoading
+    ) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-500"/>
@@ -379,7 +379,8 @@ export default function RoomManagement() {
         );
     }
 
-    const error = roomsError || roomTypesError || amenitiesError;
+    const error = roomsError || roomTypesError
+    // || amenitiesError;
 
     return (
         <div className="space-y-6">
@@ -471,7 +472,7 @@ export default function RoomManagement() {
                                             <SelectTrigger className="bg-slate-700 border-slate-600">
                                                 <SelectValue placeholder="Select room type"/>
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-slate-700 border-slate-600">
                                                 {roomTypes.map((type) => (
                                                         <SelectItem key={type.id} value={type.id.toString()}>
                                                             {type.name} - ${type.basePrice.toString()}/night
@@ -516,23 +517,23 @@ export default function RoomManagement() {
                                         </Button>
                                     </div>
 
-                                    <div>
-                                        <Label>Amenities</Label>
-                                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
-                                            {amenities.map((amenity) => (
-                                                <div key={amenity.id} className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={`amenity-${amenity.id}`}
-                                                        checked={roomForm.amenityIds.includes(amenity.id)}
-                                                        onCheckedChange={() => toggleAmenity(amenity.id)}
-                                                    />
-                                                    <Label htmlFor={`amenity-${amenity.id}`} className="text-sm">
-                                                        {amenity.name}
-                                                    </Label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    {/*<div>*/}
+                                    {/*    <Label>Amenities</Label>*/}
+                                    {/*    <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">*/}
+                                    {/*        {amenities.map((amenity) => (*/}
+                                    {/*            <div key={amenity.id} className="flex items-center space-x-2">*/}
+                                    {/*                <Checkbox*/}
+                                    {/*                    id={`amenity-${amenity.id}`}*/}
+                                    {/*                    checked={roomForm.amenityIds.includes(amenity.id)}*/}
+                                    {/*                    onCheckedChange={() => toggleAmenity(amenity.id)}*/}
+                                    {/*                />*/}
+                                    {/*                <Label htmlFor={`amenity-${amenity.id}`} className="text-sm">*/}
+                                    {/*                    {amenity.name}*/}
+                                    {/*                </Label>*/}
+                                    {/*            </div>*/}
+                                    {/*        ))}*/}
+                                    {/*    </div>*/}
+                                    {/*</div>*/}
                                 </div>
                                 <DialogFooter>
                                     <Button
@@ -678,8 +679,7 @@ export default function RoomManagement() {
                                             <Label htmlFor="basePrice">Base Price</Label>
                                             <Input
                                                 id="basePrice"
-                                                type="number"
-                                                step="0.01"
+                                                type="text"
                                                 value={roomTypeForm.basePrice}
                                                 onChange={(e) => setRoomTypeForm(prev => ({
                                                     ...prev,

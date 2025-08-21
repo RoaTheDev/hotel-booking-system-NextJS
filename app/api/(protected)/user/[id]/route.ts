@@ -29,7 +29,6 @@ const updateUserSchema = z.object({
     isDeleted: z.boolean().optional()
 });
 
-
 interface UpdatedUser {
     id: number;
     email: string;
@@ -71,7 +70,7 @@ export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: st
             }, {status: HttpStatusCode.BadRequest});
         }
 
-        const updateData = validationResult.data;
+        const validatedData = validationResult.data;
 
         const existingUser = await prisma.user.findUnique({
             where: {id: userId},
@@ -101,9 +100,9 @@ export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: st
             }, {status: HttpStatusCode.Forbidden});
         }
 
-        if (updateData.email && updateData.email !== existingUser.email) {
+        if (validatedData.email && validatedData.email !== existingUser.email) {
             const emailConflict = await prisma.user.findUnique({
-                where: {email: updateData.email},
+                where: {email: validatedData.email},
                 select: {id: true, isDeleted: true}
             });
 
@@ -117,12 +116,28 @@ export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: st
             }
         }
 
-        const dataToUpdate: UpdateUserRequest = {...updateData};
+        // Prepare update data - properly handle password hashing
+        const dataToUpdate: UpdateUserRequest = {
+            email: validatedData.email,
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
+            phone: validatedData.phone,
+            role: validatedData.role,
+            isDeleted: validatedData.isDeleted
+        };
 
-        if (updateData.password) {
+        // Hash password if provided
+        if (validatedData.password) {
             const saltRounds = 12;
-            dataToUpdate.passwordHash = await bcrypt.hash(updateData.password, saltRounds);
+            dataToUpdate.passwordHash = await bcrypt.hash(validatedData.password, saltRounds);
         }
+
+        // Remove undefined values to avoid unnecessary updates
+        Object.keys(dataToUpdate).forEach(key => {
+            if (dataToUpdate[key as keyof UpdateUserRequest] === undefined) {
+                delete dataToUpdate[key as keyof UpdateUserRequest];
+            }
+        });
 
         const updatedUser = await prisma.user.update({
             where: {id: userId},
@@ -186,6 +201,5 @@ export const PUT = async (req: NextRequest, {params}: { params: Promise<{ id: st
 };
 
 export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ id: string }> }) => {
-
     return PUT(req, {params});
 };
