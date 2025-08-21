@@ -457,7 +457,7 @@ Your mountain retreat reservation has been successfully created.
 
                         <div className="text-center">
                             <Link
-                                href="/public"
+                                href="/"
                                 className="text-slate-400 hover:text-slate-300 transition-colors duration-300"
                             >
                                 Return to Home

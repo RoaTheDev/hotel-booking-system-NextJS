@@ -261,14 +261,7 @@ export default function LoginPage() {
                                                 </FormItem>
                                             )}
                                         />
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Link
-                                                href="/forgot-password"
-                                                className="text-amber-400 hover:text-amber-300 transition-colors duration-300"
-                                            >
-                                                Forgot your password?
-                                            </Link>
-                                        </div>
+
                                         <Button
                                             type="submit"
                                             className="submit-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-light tracking-wide shadow-lg hover:shadow-amber-500/25 transition-all duration-300"

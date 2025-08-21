@@ -1,6 +1,7 @@
 'use client'
 import React, {useEffect, useState} from 'react';
 import {Award, ChefHat, Clock, Leaf, LucideIcon, Mountain, Star} from 'lucide-react';
+import Link from "next/link";
 
 interface MenuItem {
     id: number;
@@ -23,6 +24,7 @@ interface Category {
 interface GroupedItems {
     [key: string]: MenuItem[];
 }
+
 const menuItems: MenuItem[] = [
     // Appetizers
     {
@@ -388,10 +390,10 @@ export const ClientMenuPage = () => {
                     <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed font-light">
                         Reserve your table and experience the finest mountain cuisine
                     </p>
-                    <button
-                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 px-12 py-4 text-lg font-light tracking-wide rounded-full shadow-lg hover:shadow-amber-500/25 transition-all duration-500 hover:scale-110">
+                    <Link href={"/"}
+                          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 px-12 py-4 text-lg font-light tracking-wide rounded-full shadow-lg hover:shadow-amber-500/25 transition-all duration-500 hover:scale-110">
                         Make a Reservation
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>
