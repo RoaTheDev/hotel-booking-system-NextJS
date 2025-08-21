@@ -340,13 +340,7 @@ export default function RoomDetailPage({ params }: RoomPageProps) {
                                             Reserve This Room
                                         </Button>
                                     </Link>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
-                                    >
-                                        <Heart className="h-4 w-4 mr-2" />
-                                        Save to Favorites
-                                    </Button>
+
                                 </div>
 
                                 <div className="mt-6 p-4 bg-slate-700/30 rounded-lg border border-slate-600/50">

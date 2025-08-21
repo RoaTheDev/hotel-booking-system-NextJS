@@ -1,7 +1,9 @@
 import {useMutation, useQuery} from "@tanstack/react-query";
 import {useAuthStore} from "@/stores/AuthStore";
-import {ServerSignupFromData} from "@/types/authTypes";
+import {PasswordChangeForm, ServerSignupFromData} from "@/types/authTypes";
 import {fetchUserProfile} from "@/data/authApi";
+import {toast} from "sonner";
+import {ApiResponse} from "@/types/commonTypes";
 
 export const useLogin = () => {
     const login = useAuthStore((state) => state.login);
@@ -60,3 +62,34 @@ export const useFetchUser = () => {
     });
 
 }
+
+const changePassword = async (data: PasswordChangeForm): Promise<ApiResponse<null>> => {
+    const response = await fetch('/api/auth/change-password', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || 'Failed to change password');
+    }
+
+    return result;
+};
+
+export const useChangePassword = () => {
+    return useMutation({
+        mutationFn: changePassword,
+        onSuccess: (data) => {
+            toast.success(data.message || 'Password changed successfully');
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || 'Failed to change password');
+        },
+    });
+};

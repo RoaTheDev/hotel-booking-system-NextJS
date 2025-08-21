@@ -12,13 +12,13 @@ import {Label} from "@/components/ui/label"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Badge} from "@/components/ui/badge"
 import {Separator} from "@/components/ui/separator"
-import {Calendar, Clock, Edit, LogOut, MapPin, Save, Settings, User, X} from "lucide-react"
+import {Calendar, Clock, Edit, Eye, EyeOff, Lock, LogOut, MapPin, Save, User, X} from "lucide-react"
 import {useAuthStore} from "@/stores/AuthStore"
-import {ProfileForm, profileSchema} from "@/types/authTypes"
+import {PasswordChangeForm, passwordChangeSchema, ProfileForm, profileSchema} from "@/types/authTypes"
 import {ProfileLoadingSkeleton} from "@/components/skeleton/profileLoadingSkeleton";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {useLogout} from "@/hooks/authHooks";
+import {useChangePassword, useLogout} from "@/hooks/authHooks";
 import {useCancelBooking, useUserBookings} from "@/hooks/bookingHooks";
 import {format} from "date-fns";
 
@@ -26,8 +26,12 @@ import {format} from "date-fns";
 export const ClientProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+    const [showNewPassword, setShowNewPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const route = useRouter();
     const logout = useLogout()
+    const changePassword = useChangePassword()
     const [bookingStatus, setBookingStatus] = useState<string>("ALL")
     const [currentPage, setCurrentPage] = useState(1)
     const {revalidateSession} = useAuthStore();
@@ -46,6 +50,8 @@ export const ClientProfilePage = () => {
     }
     const {user, isAuthenticated, isHydrated, updateProfile} = useAuthStore()
     const containerRef = useRef<HTMLDivElement>(null)
+
+    // Profile form
     const {
         register,
         handleSubmit,
@@ -58,6 +64,21 @@ export const ClientProfilePage = () => {
             lastName: user?.lastName || "",
             email: user?.email || "",
             phone: user?.phone || null,
+        },
+    })
+
+    // Password change form
+    const {
+        register: registerPassword,
+        handleSubmit: handleSubmitPassword,
+        formState: {errors: passwordErrors},
+        reset: resetPassword,
+    } = useForm<PasswordChangeForm>({
+        resolver: zodResolver(passwordChangeSchema),
+        defaultValues: {
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
         },
     })
 
@@ -169,11 +190,13 @@ export const ClientProfilePage = () => {
 
         return () => ctx.revert()
     }, [])
+
     const onSignOut = async () => {
         await logout.mutateAsync()
         await revalidateSession()
         route.push('/');
     }
+
     const onSubmit = async (data: ProfileForm) => {
         setIsLoading(true)
         gsap.to(".save-btn", {scale: 0.95, duration: 0.1})
@@ -199,6 +222,34 @@ export const ClientProfilePage = () => {
         } finally {
             setIsLoading(false)
             gsap.to(".save-btn", {scale: 1, duration: 0.2})
+        }
+    }
+
+    const onPasswordSubmit = async (data: PasswordChangeForm) => {
+        try {
+            await changePassword.mutateAsync(data)
+            resetPassword()
+            // Reset password visibility states
+            setShowCurrentPassword(false)
+            setShowNewPassword(false)
+            setShowConfirmPassword(false)
+
+            // Animation for success
+            gsap.to(".password-form", {
+                scale: 1.02,
+                duration: 0.3,
+                yoyo: true,
+                repeat: 1,
+                ease: "power2.inOut",
+            })
+        } catch (error) {
+            // Animation for error
+            const tl = gsap.timeline()
+            tl.to(".password-form", {x: -10, duration: 0.1, ease: "power2.inOut"})
+                .to(".password-form", {x: 10, duration: 0.1, ease: "power2.inOut"})
+                .to(".password-form", {x: -10, duration: 0.1, ease: "power2.inOut"})
+                .to(".password-form", {x: 10, duration: 0.1, ease: "power2.inOut"})
+                .to(".password-form", {x: 0, duration: 0.1, ease: "power2.inOut"})
         }
     }
 
@@ -328,12 +379,13 @@ export const ClientProfilePage = () => {
                             Bookings
                         </TabsTrigger>
                         <TabsTrigger
-                            value="settings"
+                            value="security"
                             className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-slate-900"
                         >
-                            <Settings className="h-4 w-4"/>
-                            Settings
+                            <Lock className="h-4 w-4"/>
+                            Security
                         </TabsTrigger>
+
                     </TabsList>
 
                     <TabsContent value="profile">
@@ -448,6 +500,122 @@ export const ClientProfilePage = () => {
                                             {isLoading ? "Saving..." : "Save Changes"}
                                         </Button>
                                     )}
+                                </form>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="security">
+                        <Card className="border-0 shadow-2xl bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
+                            <CardHeader>
+                                <CardTitle className="text-2xl font-light text-slate-100">Change Password</CardTitle>
+                                <p className="text-slate-400">Update your password to keep your account secure</p>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmitPassword(onPasswordSubmit)}
+                                      className="password-form space-y-6">
+                                    <div className="form-input">
+                                        <Label className="text-slate-300 mb-2 block font-light">Current Password</Label>
+                                        <div className="relative">
+                                            <Input
+                                                {...registerPassword("currentPassword")}
+                                                type={showCurrentPassword ? "text" : "password"}
+                                                className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300 pr-10"
+                                                placeholder="Enter your current password"
+                                                autoComplete="new-password"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                            >
+                                                {showCurrentPassword ? (
+                                                    <EyeOff className="h-4 w-4 text-slate-400"/>
+                                                ) : (
+                                                    <Eye className="h-4 w-4 text-slate-400"/>
+                                                )}
+                                            </Button>
+                                        </div>
+                                        {passwordErrors.currentPassword &&
+                                            <p className="text-sm text-red-400 mt-1">{passwordErrors.currentPassword.message}</p>}
+                                    </div>
+
+                                    <div className="form-input">
+                                        <Label className="text-slate-300 mb-2 block font-light">New Password</Label>
+                                        <div className="relative">
+                                            <Input
+                                                {...registerPassword("newPassword")}
+                                                type={showNewPassword ? "text" : "password"}
+                                                className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300 pr-10"
+                                                placeholder="Enter your new password"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                            >
+                                                {showNewPassword ? (
+                                                    <EyeOff className="h-4 w-4 text-slate-400"/>
+                                                ) : (
+                                                    <Eye className="h-4 w-4 text-slate-400"/>
+                                                )}
+                                            </Button>
+                                        </div>
+                                        {passwordErrors.newPassword &&
+                                            <p className="text-sm text-red-400 mt-1">{passwordErrors.newPassword.message}</p>}
+                                    </div>
+
+                                    <div className="form-input">
+                                        <Label className="text-slate-300 mb-2 block font-light">Confirm New
+                                            Password</Label>
+                                        <div className="relative">
+                                            <Input
+                                                {...registerPassword("confirmPassword")}
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20 transition-all duration-300 pr-10"
+                                                placeholder="Confirm your new password"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            >
+                                                {showConfirmPassword ? (
+                                                    <EyeOff className="h-4 w-4 text-slate-400"/>
+                                                ) : (
+                                                    <Eye className="h-4 w-4 text-slate-400"/>
+                                                )}
+                                            </Button>
+                                        </div>
+                                        {passwordErrors.confirmPassword &&
+                                            <p className="text-sm text-red-400 mt-1">{passwordErrors.confirmPassword.message}</p>}
+                                    </div>
+
+                                    <div className="bg-slate-700/20 p-4 rounded-lg border border-slate-600/30">
+                                        <h4 className="text-slate-200 font-medium mb-2">Password Requirements:</h4>
+                                        <ul className="text-sm text-slate-400 space-y-1">
+                                            <li>• At least 8 characters long</li>
+                                            <li>• At least one uppercase letter (A-Z)</li>
+                                            <li>• At least one lowercase letter (a-z)</li>
+                                            <li>• At least one number (0-9)</li>
+                                            <li>• At least one special character (@$!%*?&)</li>
+                                        </ul>
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-900 flex items-center gap-2 font-light tracking-wide shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
+                                        disabled={changePassword.isPending}
+                                    >
+                                        <Lock className="h-4 w-4"/>
+                                        {changePassword.isPending ? "Changing Password..." : "Change Password"}
+                                    </Button>
                                 </form>
                             </CardContent>
                         </Card>
@@ -650,53 +818,8 @@ export const ClientProfilePage = () => {
                             </CardContent>
                         </Card>
                     </TabsContent>
-
-                    <TabsContent value="settings">
-                        <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
-                            <CardHeader>
-                                <CardTitle className="text-2xl font-light text-slate-100">Account Settings</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <div
-                                        className="flex justify-between items-center p-4 border border-slate-700/50 rounded-lg bg-slate-700/20 hover:bg-slate-700/30 transition-all duration-300">
-                                        <div>
-                                            <h3 className="font-medium text-slate-100">Change Password</h3>
-                                            <p className="text-sm text-slate-400">Update your account password for
-                                                security</p>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-green-400/30 text-green-400 hover:bg-green-400/10 hover:border-green-400 bg-transparent transition-all duration-300"
-
-                                        >
-                                            Change
-                                        </Button>
-                                    </div>
-
-                                    <div
-                                        className="flex justify-between items-center p-4 border border-red-500/50 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all duration-300">
-                                        <div>
-                                            <h3 className="font-medium text-red-400">Delete Account</h3>
-                                            <p className="text-sm text-red-300">Permanently delete your account and all
-                                                data</p>
-                                        </div>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            className="bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500 transition-all duration-300"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
                 </Tabs>
             </div>
         </div>
     )
-
 }
