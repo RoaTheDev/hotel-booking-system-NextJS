@@ -10,9 +10,6 @@ import {validationErrorFormat} from "@/utils/zodErrorFormat";
 import Role = $Enums.Role;
 import BookingWhereInput = Prisma.BookingWhereInput;
 
-interface RouteParams {
-    params: Promise<{ id: string }>; // Updated to use Promise
-}
 
 export const GET = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
     try {
