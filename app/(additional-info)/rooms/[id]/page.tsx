@@ -3,7 +3,10 @@ import { RoomWithDetails } from "@/types/roomTypes";
 import ClientRoomDetail from "./clientRoomDetailPage";
 
 async function fetchRoom(roomId: string): Promise<RoomWithDetails> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`);
+    const baseURL = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}/api`
+        : "http://localhost:3000/api";
+    const res = await fetch(`${baseURL}/rooms/${roomId}`);
 
     if (!res.ok) notFound(); // throws 404
 

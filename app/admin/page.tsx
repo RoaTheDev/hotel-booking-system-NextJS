@@ -171,9 +171,9 @@ export default function EnhancedAdminDashboard(): JSX.Element {
                     <p className="text-red-400">Error loading dashboard data: {error.message}</p>
                     <Button
                         className="mt-4 bg-emerald-500 hover:bg-emerald-600"
-                        onClick={() => window.location.reload()}
+                        onClick={() => window.location.replace('/')}
                     >
-                        Retry
+                        Go Back Home
                     </Button>
                 </div>
             </div>

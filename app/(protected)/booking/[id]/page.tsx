@@ -115,7 +115,7 @@ export default function BookingPage({params}: { params: Promise<{ id: string }> 
                         <p className="text-slate-400 mb-6">{`
             The room you're looking for doesn't exist or is no longer available.
         `}</p>
-                        <Link href="/public">
+                        <Link href="/rooms">
                             <Button
                                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900">
                                 Browse Available Rooms
