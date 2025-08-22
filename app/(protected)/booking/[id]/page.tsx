@@ -59,6 +59,10 @@ export default function BookingPage({params}: { params: Promise<{ id: string }> 
                         setError('Room not found')
                         return
                     }
+                    if(response.status === 400){
+                        const res = await response.json()
+                        setError(res.message)
+                    }
                     throw new Error(`Failed to fetch room: ${response.status}`)
                 }
 

@@ -10,6 +10,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
+import {Checkbox} from '@/components/ui/checkbox';
 import {AlertCircle, Edit, Eye, ImagesIcon, Loader2, Plus, Trash2} from 'lucide-react';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
@@ -54,6 +55,20 @@ interface Room {
     };
 }
 
+interface AmenityWithDetails {
+    id: number;
+    name: string;
+    icon: string | null;
+    description: string | null;
+    isActive: boolean;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    _count?: {
+        rooms: number;
+    };
+}
+
 interface CreateRoomForm {
     roomNumber: string;
     roomTypeId: number | null;
@@ -70,6 +85,13 @@ interface CreateRoomTypeForm {
     imageUrl: string;
 }
 
+interface CreateAmenityForm {
+    name: string;
+    icon: string;
+    description: string;
+    isActive: boolean;
+}
+
 interface ImageForm {
     imageUrl: string;
     caption: string;
@@ -77,7 +99,7 @@ interface ImageForm {
 
 export default function RoomManagement() {
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTab] = useState<'rooms' | 'roomTypes'>('rooms');
+    const [activeTab, setActiveTab] = useState<'rooms' | 'roomTypes' | 'amenities'>('rooms');
     const [roomForm, setRoomForm] = useState<CreateRoomForm>({
         roomNumber: '',
         roomTypeId: null,
@@ -96,6 +118,14 @@ export default function RoomManagement() {
     });
     const [roomTypeDialogOpen, setRoomTypeDialogOpen] = useState(false);
     const [editingRoomType, setEditingRoomType] = useState<RoomTypeWithDetails | null>(null);
+    const [amenityForm, setAmenityForm] = useState<CreateAmenityForm>({
+        name: '',
+        icon: '',
+        description: '',
+        isActive: true,
+    });
+    const [amenityDialogOpen, setAmenityDialogOpen] = useState(false);
+    const [editingAmenity, setEditingAmenity] = useState<AmenityWithDetails | null>(null);
     const [imageDialogOpen, setImageDialogOpen] = useState(false);
     const [selectedRoomForImages, setSelectedRoomForImages] = useState<Room | null>(null);
     const [imageForm, setImageForm] = useState<ImageForm>({imageUrl: '', caption: ''});
@@ -123,18 +153,15 @@ export default function RoomManagement() {
             },
         });
 
-
-    // const {data: amenities = [], isLoading: amenitiesLoading, error: amenitiesError} =
-    //     useQuery<AmenityWithDetails[]>({
-    //         queryKey: ['amenities'],
-    //         queryFn: async () => {
-    //             const response = await axios.get('/api/admin/amenities');
-    //             if (!response.data.success) return [];
-    //
-    //             return response.data.data.amenities ?? [];
-    //         },
-    //     });
-
+    const {data: amenities = [], isLoading: amenitiesLoading, error: amenitiesError} =
+        useQuery<AmenityWithDetails[]>({
+            queryKey: ['amenities'],
+            queryFn: async () => {
+                const response = await axios.get('/api/admin/amenities');
+                if (!response.data.success) return [];
+                return response.data.data.amenities ?? [];
+            },
+        });
 
     const {data: roomImages = [], isLoading: imagesLoading, refetch: refetchImages} = useQuery<RoomImage[]>({
         queryKey: ['roomImages', selectedRoomForImages?.id],
@@ -146,6 +173,7 @@ export default function RoomManagement() {
         enabled: !!selectedRoomForImages,
     });
 
+    // Room mutations
     const createRoomMutation = useMutation({
         mutationFn: (formData: CreateRoomForm) =>
             axios.post('/api/admin/rooms', {
@@ -189,6 +217,7 @@ export default function RoomManagement() {
         },
     });
 
+    // Room Type mutations
     const createRoomTypeMutation = useMutation({
         mutationFn: (formData: CreateRoomTypeForm) => axios.post('/api/admin/room-types', formData),
         onSuccess: async () => {
@@ -224,6 +253,43 @@ export default function RoomManagement() {
         },
     });
 
+    // Amenity mutations
+    const createAmenityMutation = useMutation({
+        mutationFn: (formData: CreateAmenityForm) => axios.post('/api/admin/amenities', formData),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ['amenities']});
+            setAmenityDialogOpen(false);
+            resetAmenityForm();
+        },
+        onError: (error) => {
+            console.error('Create amenity error:', error);
+        },
+    });
+
+    const updateAmenityMutation = useMutation({
+        mutationFn: (formData: CreateAmenityForm) => axios.put(`/api/admin/amenities/${editingAmenity?.id}`, formData),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ['amenities']});
+            setAmenityDialogOpen(false);
+            resetAmenityForm();
+            setEditingAmenity(null);
+        },
+        onError: (error) => {
+            console.error('Update amenity error:', error);
+        },
+    });
+
+    const deleteAmenityMutation = useMutation({
+        mutationFn: (amenityId: number) => axios.delete(`/api/admin/amenities/${amenityId}`),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ['amenities']});
+        },
+        onError: (error) => {
+            console.error('Delete amenity error:', error);
+        },
+    });
+
+    // Image mutations
     const addImageMutation = useMutation({
         mutationFn: ({roomId, imageData}: { roomId: number; imageData: ImageForm }) =>
             axios.post(`/api/admin/rooms/${roomId}/images`, imageData),
@@ -262,6 +328,7 @@ export default function RoomManagement() {
         },
     });
 
+    // Helper functions
     const resetRoomForm = () => {
         setRoomForm({
             roomNumber: '',
@@ -279,6 +346,15 @@ export default function RoomManagement() {
             basePrice: 0,
             maxGuests: 1,
             imageUrl: '',
+        });
+    };
+
+    const resetAmenityForm = () => {
+        setAmenityForm({
+            name: '',
+            icon: '',
+            description: '',
+            isActive: true,
         });
     };
 
@@ -316,6 +392,22 @@ export default function RoomManagement() {
         setRoomTypeDialogOpen(true);
     };
 
+    const openAmenityDialog = (amenity?: AmenityWithDetails) => {
+        if (amenity) {
+            setEditingAmenity(amenity);
+            setAmenityForm({
+                name: amenity.name,
+                icon: amenity.icon || '',
+                description: amenity.description || '',
+                isActive: amenity.isActive,
+            });
+        } else {
+            setEditingAmenity(null);
+            resetAmenityForm();
+        }
+        setAmenityDialogOpen(true);
+    };
+
     const openImageDialog = (room: Room) => {
         setSelectedRoomForImages(room);
         setImageDialogOpen(true);
@@ -347,14 +439,14 @@ export default function RoomManagement() {
         }));
     };
 
-    // const toggleAmenity = (amenityId: number) => {
-    //     setRoomForm(prev => ({
-    //         ...prev,
-    //         amenityIds: prev.amenityIds.includes(amenityId)
-    //             ? prev.amenityIds.filter(id => id !== amenityId)
-    //             : [...prev.amenityIds, amenityId],
-    //     }));
-    // };
+    const toggleAmenity = (amenityId: number) => {
+        setRoomForm(prev => ({
+            ...prev,
+            amenityIds: prev.amenityIds.includes(amenityId)
+                ? prev.amenityIds.filter(id => id !== amenityId)
+                : [...prev.amenityIds, amenityId],
+        }));
+    };
 
     const addBulkImage = () => {
         setBulkImages(prev => [...prev, {imageUrl: '', caption: ''}]);
@@ -368,19 +460,16 @@ export default function RoomManagement() {
         setBulkImages(prev => prev.map((img, i) => (i === index ? {...img, [field]: value} : img)));
     };
 
-    if (roomsLoading || roomTypesLoading
-        //|| amenitiesLoading
-    ) {
+    if (roomsLoading || roomTypesLoading || amenitiesLoading) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-500"/>
-                <span className="ml-2 text-slate-300">Loading rooms...</span>
+                <span className="ml-2 text-slate-300">Loading data...</span>
             </div>
         );
     }
 
-    const error = roomsError || roomTypesError
-    // || amenitiesError;
+    const error = roomsError || roomTypesError || amenitiesError;
 
     return (
         <div className="space-y-6">
@@ -409,8 +498,17 @@ export default function RoomManagement() {
                 >
                     Room Types
                 </button>
+                <button
+                    onClick={() => setActiveTab('amenities')}
+                    className={`pb-2 px-1 font-medium transition-colors ${
+                        activeTab === 'amenities' ? 'border-b-2 border-purple-500 text-purple-400' : 'text-slate-400 hover:text-slate-300'
+                    }`}
+                >
+                    Amenities
+                </button>
             </div>
 
+            {/* Rooms Tab */}
             {activeTab === 'rooms' && (
                 <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -517,23 +615,24 @@ export default function RoomManagement() {
                                         </Button>
                                     </div>
 
-                                    {/*<div>*/}
-                                    {/*    <Label>Amenities</Label>*/}
-                                    {/*    <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">*/}
-                                    {/*        {amenities.map((amenity) => (*/}
-                                    {/*            <div key={amenity.id} className="flex items-center space-x-2">*/}
-                                    {/*                <Checkbox*/}
-                                    {/*                    id={`amenity-${amenity.id}`}*/}
-                                    {/*                    checked={roomForm.amenityIds.includes(amenity.id)}*/}
-                                    {/*                    onCheckedChange={() => toggleAmenity(amenity.id)}*/}
-                                    {/*                />*/}
-                                    {/*                <Label htmlFor={`amenity-${amenity.id}`} className="text-sm">*/}
-                                    {/*                    {amenity.name}*/}
-                                    {/*                </Label>*/}
-                                    {/*            </div>*/}
-                                    {/*        ))}*/}
-                                    {/*    </div>*/}
-                                    {/*</div>*/}
+                                    <div>
+                                        <Label>Amenities</Label>
+                                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
+                                            {amenities.filter(amenity => amenity.isActive).map((amenity) => (
+                                                <div key={amenity.id} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={`amenity-${amenity.id}`}
+                                                        checked={roomForm.amenityIds.includes(amenity.id)}
+                                                        onCheckedChange={() => toggleAmenity(amenity.id)}
+                                                    />
+                                                    <Label htmlFor={`amenity-${amenity.id}`} className="text-sm flex items-center gap-1">
+                                                        {amenity.icon && <span className="text-xs">{amenity.icon}</span>}
+                                                        {amenity.name}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                                 <DialogFooter>
                                     <Button
@@ -562,6 +661,7 @@ export default function RoomManagement() {
                                         <TableHead className="text-slate-300 font-light">Type</TableHead>
                                         <TableHead className="text-slate-300 font-light">Floor</TableHead>
                                         <TableHead className="text-slate-300 font-light">Status</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Amenities</TableHead>
                                         <TableHead className="text-slate-300 font-light">Images</TableHead>
                                         <TableHead className="text-slate-300 font-light">Price/Night</TableHead>
                                         <TableHead className="text-slate-300 font-light">Actions</TableHead>
@@ -580,6 +680,21 @@ export default function RoomManagement() {
                                             <TableCell>
                                                 <Badge
                                                     variant={room.isActive ? 'default' : 'secondary'}>{room.isActive ? 'Active' : 'Inactive'}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {room.amenities.slice(0, 3).map((roomAmenity) => (
+                                                        <Badge key={roomAmenity.amenity.id} variant="outline" className="text-xs">
+                                                            {roomAmenity.amenity.icon && <span className="mr-1">{roomAmenity.amenity.icon}</span>}
+                                                            {roomAmenity.amenity.name}
+                                                        </Badge>
+                                                    ))}
+                                                    {room.amenities.length > 3 && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            +{room.amenities.length - 3} more
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
@@ -632,6 +747,7 @@ export default function RoomManagement() {
                 </Card>
             )}
 
+            {/* Room Types Tab */}
             {activeTab === 'roomTypes' && (
                 <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -791,6 +907,157 @@ export default function RoomManagement() {
                 </Card>
             )}
 
+            {/* Amenities Tab */}
+            {activeTab === 'amenities' && (
+                <Card className="shadow-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-2xl font-light text-slate-100">Amenity Management</CardTitle>
+                        <Dialog open={amenityDialogOpen} onOpenChange={setAmenityDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    onClick={() => openAmenityDialog()}
+                                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-slate-900 flex items-center gap-2 font-light shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+                                >
+                                    <Plus className="h-4 w-4"/>
+                                    Add Amenity
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-lg bg-slate-800 border-slate-700 text-slate-100">
+                                <DialogHeader>
+                                    <DialogTitle>{editingAmenity ? 'Edit Amenity' : 'Add New Amenity'}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="amenityName">Name</Label>
+                                        <Input
+                                            id="amenityName"
+                                            value={amenityForm.name}
+                                            onChange={(e) => setAmenityForm(prev => ({...prev, name: e.target.value}))}
+                                            placeholder="WiFi, Pool, Gym, etc."
+                                            className="bg-slate-700 border-slate-600"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="amenityIcon">Icon (Emoji)</Label>
+                                        <Input
+                                            id="amenityIcon"
+                                            value={amenityForm.icon}
+                                            onChange={(e) => setAmenityForm(prev => ({...prev, icon: e.target.value}))}
+                                            placeholder="📶 🏊‍♂️ 💪 etc."
+                                            className="bg-slate-700 border-slate-600"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="amenityDescription">Description</Label>
+                                        <Textarea
+                                            id="amenityDescription"
+                                            value={amenityForm.description}
+                                            onChange={(e) => setAmenityForm(prev => ({
+                                                ...prev,
+                                                description: e.target.value
+                                            }))}
+                                            placeholder="Brief description of the amenity"
+                                            className="bg-slate-700 border-slate-600"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="amenityActive"
+                                            checked={amenityForm.isActive}
+                                            onCheckedChange={(checked) => setAmenityForm(prev => ({
+                                                ...prev,
+                                                isActive: checked as boolean
+                                            }))}
+                                        />
+                                        <Label htmlFor="amenityActive">Active</Label>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        onClick={() => (editingAmenity ? updateAmenityMutation.mutate(amenityForm) : createAmenityMutation.mutate(amenityForm))}
+                                        className="bg-purple-600 hover:bg-purple-700"
+                                        disabled={createAmenityMutation.isPending || updateAmenityMutation.isPending}
+                                    >
+                                        {createAmenityMutation.isPending || updateAmenityMutation.isPending ? (
+                                            <Loader2 className="h-4 w-4 animate-spin"/>
+                                        ) : editingAmenity ? (
+                                            'Update Amenity'
+                                        ) : (
+                                            'Create Amenity'
+                                        )}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+                            <Table>
+                                <TableHeader className="bg-slate-700/30">
+                                    <TableRow className="border-slate-700/50 hover:bg-slate-700/20">
+                                        <TableHead className="text-slate-300 font-light">Name</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Icon</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Description</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Status</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Rooms Using</TableHead>
+                                        <TableHead className="text-slate-300 font-light">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {amenities.map((amenity) => (
+                                        <TableRow key={amenity.id}
+                                                  className="border-slate-700/50 hover:bg-slate-700/20 transition-colors duration-200">
+                                            <TableCell className="font-medium text-slate-200">{amenity.name}</TableCell>
+                                            <TableCell className="text-2xl">{amenity.icon || '—'}</TableCell>
+                                            <TableCell
+                                                className="text-slate-300 max-w-xs truncate">{amenity.description || 'N/A'}</TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={amenity.isActive ? 'default' : 'secondary'}>{amenity.isActive ? 'Active' : 'Inactive'}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className="text-xs">
+                                                    {amenity._count?.rooms || 0} rooms
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openAmenityDialog(amenity)}
+                                                        className="border-slate-600 text-slate-300 hover:bg-slate-700/50 bg-transparent transition-all duration-300"
+                                                    >
+                                                        <Edit className="h-4 w-4"/>
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            if (confirm('Are you sure you want to delete this amenity?')) {
+                                                                deleteAmenityMutation.mutate(amenity.id);
+                                                            }
+                                                        }}
+                                                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-400 bg-transparent transition-all duration-300"
+                                                        disabled={deleteAmenityMutation.isPending}
+                                                    >
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Image Management Dialog */}
             <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
                 <DialogContent className="max-w-4xl bg-slate-800 border-slate-700 text-slate-100">
                     <DialogHeader>
@@ -929,6 +1196,7 @@ export default function RoomManagement() {
                 </DialogContent>
             </Dialog>
 
+            {/* Bulk Image Upload Dialog */}
             <Dialog open={bulkImageDialogOpen} onOpenChange={setBulkImageDialogOpen}>
                 <DialogContent className="max-w-2xl bg-slate-800 border-slate-700 text-slate-100">
                     <DialogHeader>
@@ -1010,12 +1278,12 @@ export default function RoomManagement() {
                 </DialogContent>
             </Dialog>
 
+            {/* Image Preview Dialog */}
             <Dialog open={!!previewImageUrl} onOpenChange={() => setPreviewImageUrl(null)}>
                 <DialogContent className="max-w-4xl bg-slate-800 border-slate-700 text-slate-100">
                     <DialogHeader>
                         <DialogTitle className="flex items-center justify-between">
                             Image Preview
-
                         </DialogTitle>
                     </DialogHeader>
 

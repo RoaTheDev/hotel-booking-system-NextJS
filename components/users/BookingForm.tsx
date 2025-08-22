@@ -334,10 +334,12 @@ export const BookingForm = ({room, roomId}: BookingFormProps) => {
                                             </Label>
                                             <Input
                                                 type="number"
-                                                min="1"
+                                                min={1}
                                                 max={room.roomType.maxGuests}
-                                                {...register("guests", {valueAsNumber: true})}
+                                                {...register("guests", { valueAsNumber: true })}
                                                 className="bg-slate-700/50 border-slate-600 text-slate-100 focus:border-amber-400 focus:ring-amber-400/20"
+                                                onKeyDown={(e) => e.preventDefault()} // block typing
+                                                onFocus={(e) => e.target.blur()}
                                             />
                                             {errors.guests && (
                                                 <p className="text-sm text-red-400 mt-1">{errors.guests.message}</p>

@@ -14,6 +14,7 @@ export const useCreateBooking = () => {
                 '/api/bookings',
                 bookingData, {withCredentials: true}
             )
+
             return response.data.data!
         },
         onSuccess: async (data) => {
@@ -25,10 +26,18 @@ export const useCreateBooking = () => {
             })
         },
         onError: (error) => {
-            const errorMessage = error.message || 'Failed to create booking'
-            toast.error('Booking Failed', {
-                description: errorMessage
-            })
+            if (axios.isAxiosError(error)) {
+                const backendMessage = error.response?.data?.message
+                toast.error('Booking Failed', {
+                    description: backendMessage || 'Failed to create booking'
+                })
+            } else {
+
+                const errorMessage = error.message || 'Failed to create booking'
+                toast.error('Booking Failed', {
+                    description: errorMessage
+                })
+            }
         }
     })
 }
@@ -77,8 +86,8 @@ export const useCancelBooking = () => {
             const response = await axios.delete<ApiResponse<BookingWithDetails>>(`/api/bookings/${bookingId}`);
             return response.data.data;
         },
-        onSuccess: async ( bookingId) => {
-            await queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+        onSuccess: async (bookingId) => {
+            await queryClient.invalidateQueries({queryKey: ['booking', bookingId]});
         },
         onError: (error) => {
             console.error('Error cancelling booking:', error);

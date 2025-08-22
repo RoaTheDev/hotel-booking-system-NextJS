@@ -111,7 +111,6 @@ export default function BookingConfirmationPage({params}: { params: Promise<{ id
             </div>
         )
     }
-
     if (error || !booking) {
         return (
             <div className="min-h-screen bg-slate-900 flex items-center justify-center">
