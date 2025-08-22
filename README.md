@@ -1,196 +1,165 @@
-# Hotel MVP - Page Structure & UI Routes
+# Next.js Project with Prisma and shadcn/ui
 
-## 📁 Public Pages (No Authentication Required)
+This is a [Next.js](https://nextjs.org/) project set up with [Prisma](https://www.prisma.io/) for database management and [shadcn/ui](https://ui.shadcn.com/) for customizable UI components. The project includes a robust backend with a PostgreSQL database and a modern frontend styled with Tailwind CSS and shadcn/ui components.
 
-### `/` - Homepage
-- **Hero section** with hotel images
-- **Search form** (check-in, check-out, guests)
-- **Featured room types** preview
-- **About section** with hotel info
-- **Contact information**
+## Table of Contents
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+    - [1. Clone the Repository](#1-clone-the-repository)
+    - [2. Install Dependencies](#2-install-dependencies)
+    - [3. Set Up Environment Variables](#3-set-up-environment-variables)
+    - [4. Set Up the Database](#4-set-up-the-database)
+    - [5. Run the Application](#5-run-the-application)
+- [Project Structure](#project-structure)
+- [shadcn/ui Setup](#shadcnui-setup)
+- [Prisma Usage](#prisma-usage)
+- [Scripts](#scripts)
 
-### `/rooms` - Room Listing
-- **Room cards** with images, prices, amenities
-- **Filter sidebar** (price range, amenities, room type)
-- **Search results** based on dates/guests
-- **"Book Now" buttons** → redirects to login if not authenticated
+## Prerequisites
+Before you begin, ensure you have the following installed:
+- **Node.js**: Version 18.x or later (LTS recommended)
+- **npm** or **yarn**: For managing dependencies
+- **PostgreSQL**: A running PostgreSQL database (local or hosted)
+- **Git**: For cloning the repository
 
-### `/rooms/[id]` - Room Detail
-- **Room image gallery**
-- **Room description** and specifications
-- **Amenities list** with icons
-- **Pricing information**
-- **Availability calendar** view
-- **Book Now form** (dates, guests)
+## Getting Started
 
-### `/auth/login` - Login Page
-- **Email/password form**
-- **"Remember me" checkbox**
-- **Link to register**
-- **Admin login** (same form, role-based redirect)
+Follow these steps to set up and run the project locally.
 
-### `/auth/register` - Registration Page
-- **User details form** (name, email, phone)
-- **Password requirements**
-- **Terms acceptance**
-- **Link to login**
+### 1. Clone the Repository
+Clone the project to your local machine:
+```bash
+git clone https://github.com/RoaTheDev/hotel-booking-system-NextJS
+cd your-repo-name
+```
 
----
+### 2. Install Dependencies
+Install the project dependencies using npm or yarn:
+```bash
+npm install
+# or
+yarn install
+```
 
-## 🔒 Guest Protected Pages (GUEST Role)
+### 3. Set Up Environment Variables
+Create a `.env` file in the root of the project and add the following environment variables:
+```env
+JWT_SECRET_KEY=your-secret-key
+JWT_EXPIRES_IN=7d
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+DATABASE_URL="postgresql://username:password@localhost:5432/your-database-name?schema=public"
+```
 
-### `/dashboard` - Guest Dashboard
-- **Welcome message** with user name
-- **Current bookings** (confirmed, upcoming)
-- **Past bookings** history
-- **Quick actions** (new booking, profile)
+- Replace `username`, `password`, and `your-database-name` with your PostgreSQL credentials and database name.
+- `NEXT_PUBLIC_API_URL` is used for API calls from the frontend. Update it if you deploy to a different host.
 
-### `/booking/search` - Booking Search
-- **Advanced search form** with date picker
-- **Real-time availability** checking
-- **Room comparison** tool
-- **Filter by amenities**
+### 4. Set Up the Database
+This project uses Prisma as the ORM to interact with a PostgreSQL database. Follow these steps to set up the database:
 
-### `/booking/[roomId]` - Booking Form
-- **Room summary** with selected dates
-- **Guest information** form
-- **Special requests** text area
-- **Price breakdown** (taxes, fees)
-- **Payment section** (Stripe integration)
+1. Ensure your PostgreSQL server is running and the `DATABASE_URL` in the `.env` file points to a valid database.
+2. Run the Prisma migration to create the database schema:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+   This command creates the tables defined in the `prisma/schema.prisma` file and generates the Prisma Client.
 
-### `/booking/confirmation/[bookingId]` - Booking Confirmation
-- **Booking details** summary
-- **Confirmation number**
-- **Payment receipt**
-- **Hotel contact** information
-- **Calendar add** buttons
+3. (Optional) Seed the database with initial data if you have a seed script:
+   ```bash
+   npx prisma db seed
+   ```
 
-### `/bookings` - My Bookings
-- **Booking history** table/cards
-- **Filter by status** (upcoming, past, cancelled)
-- **Booking details** expandable
-- **Cancel booking** option (with policies)
+### 5. Run the Application
+Start the Next.js development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-### `/bookings/[id]` - Booking Details
-- **Complete booking** information
-- **Room details** and amenities
-- **Cancellation policy**
-- **Contact hotel** option
-- **Modify booking** (if policy allows)
+The application will be available at `http://localhost:3000`. Open this URL in your browser to view the app.
 
-### `/profile` - User Profile
-- **Personal information** form
-- **Password change** section
-- **Booking preferences**
-- **Delete account** option
+## Project Structure
+A high-level overview of the project structure:
+```
+├── app
+│   ├── (additional-info)
+│   │   ├── amenities
+│   │   ├── dining
+│   │   ├── garden
+│   │   ├── onsen
+│   │   └── rooms
+│   ├── admin
+│   ├── api
+│   │   ├── (domain)
+│   │   ├── (protected)
+│   │   └── (public)
+│   ├── (auth)
+│   │   ├── login
+│   │   └── signup
+│   ├── generated
+│   │   └── prisma
+│   └── (protected)
+│       ├── booking
+│       └── profile
+├── components
+│   ├── admin
+│   ├── common
+│   ├── layout
+│   ├── skeleton
+│   ├── ui
+│   └── users
+├── data
+├── hooks
+├── lib
+├── middleware
+├── prisma
+│   └── migrations
+│       ├── 20250720182645_init
+│       └── 20250805093937_add
+├── public
+├── stores
+├── types
+└── utils
+```
 
----
+## shadcn/ui Setup
+This project uses [shadcn/ui](https://ui.shadcn.com/) for UI components. These components are not installed as a dependency but are copied directly into the `app/components/ui/` directory during development. Therefore, **no additional setup for shadcn/ui is required**. The components are already integrated and styled with Tailwind CSS.
 
-## 🛡️ Admin Protected Pages (ADMIN Role)
+If you need to add more shadcn/ui components, you can use the shadcn/ui CLI:
+```bash
+npx shadcn-ui@latest add <component-name>
+```
+For example, to add a button component:
+```bash
+npx shadcn-ui@latest add button
+```
+This will add the component to the `app/components/ui/` directory. Refer to the [shadcn/ui documentation](https://ui.shadcn.com/docs) for available components.
 
-### `/admin` - Admin Dashboard
-- **Key metrics** (occupancy, revenue, bookings)
-- **Today's check-ins/check-outs**
-- **Recent bookings** list
-- **Quick actions** (add room, view calendar)
+## Prisma Usage
+Prisma is configured to work with a PostgreSQL database. The schema is defined in `prisma/schema.prisma` and includes models for users, bookings, rooms, amenities, and more.
 
-### `/admin/rooms` - Room Management
-- **Room list** with status indicators
-- **Add new room** button
-- **Edit/delete** actions
-- **Room availability** toggle
-- **Bulk actions** (maintenance mode)
+To update the database schema:
+1. Modify `prisma/schema.prisma` as needed.
+2. Generate a new migration:
+   ```bash
+   npx prisma migrate dev --name your-migration-name
+   ```
+3. Update the Prisma Client:
+   ```bash
+   npx prisma generate
+   ```
 
-### `/admin/rooms/add` - Add Room
-- **Room details** form
-- **Room type** selection
-- **Amenities** checkboxes
-- **Upload images** section
-- **Pricing** settings
+To explore the database interactively, use Prisma Studio:
+```bash
+npx prisma studio
+```
 
-### `/admin/rooms/[id]/edit` - Edit Room
-- **Pre-populated** room form
-- **Image management** (add/remove)
-- **Availability** settings
-- **Maintenance** scheduling
-
-### `/admin/bookings` - Booking Management
-- **All bookings** table
-- **Filter by status/date**
-- **Search by guest** name/email
-- **Booking actions** (confirm, cancel, modify)
-- **Export bookings** (CSV)
-
-### `/admin/bookings/[id]` - Booking Details (Admin)
-- **Complete booking** information
-- **Guest details** and contact
-- **Payment status** and history
-- **Admin notes** section
-- **Modify booking** capabilities
-
-### `/admin/availability` - Room Availability Calendar
-- **Calendar view** (monthly/weekly)
-- **Room availability** grid
-- **Block dates** for maintenance
-- **Bulk availability** updates
-
-### `/admin/amenities` - Amenity Management
-- **Amenities list** with usage count
-- **Add new amenity** form
-- **Edit/delete** amenities
-- **Icon selection** for UI
-
-### `/admin/users` - User Management
-- **User list** with roles
-- **Search users** by email/name
-- **Change user roles**
-- **View user** booking history
-
----
-
-## 📱 Additional Pages
-
-### `/404` - Not Found
-- **Custom 404** page
-- **Search functionality**
-- **Popular rooms** suggestions
-- **Back to home** button
-
-### `/500` - Server Error
-- **Friendly error** message
-- **Contact support** information
-- **Try again** button
-
-### `/booking/cancelled` - Booking Cancelled
-- **Cancellation confirmation**
-- **Refund information**
-- **New booking** suggestions
-
-### `/maintenance` - Maintenance Mode
-- **Maintenance message**
-- **Expected back** time
-- **Contact information**
-
----
-
-## 🎯 MVP Priority (Build First)
-
-### Phase 1 (Core MVP):
-1. `/` - Homepage
-2. `/rooms` - Room listing
-3. `/rooms/[id]` - Room details
-4. `/auth/login` & `/auth/register`
-5. `/booking/[roomId]` - Booking form
-6. `/booking/confirmation/[bookingId]`
-
-### Phase 2 (User Management):
-7. `/dashboard` - Guest dashboard
-8. `/bookings` - My bookings
-9. `/profile` - User profile
-
-### Phase 3 (Admin Features):
-10. `/admin` - Admin dashboard
-11. `/admin/rooms` - Room management
-12. `/admin/bookings` - Booking management
-
-This structure gives you a complete hotel booking system while keeping the MVP focused on essential features first!
+## Scripts
+Available scripts in `package.json`:
+- `npm run dev`: Starts the Next.js development server
+- `npm run build`: Builds the application for production
+- `npm run start`: Starts the production server
+- `npm run lint`: Runs the linter
+- `npm prisma:migrate`: Runs Prisma migrations
+- `npm prisma:generate`: Generates the Prisma Client
+- `npm prisma:studio`: Opens Prisma Studio

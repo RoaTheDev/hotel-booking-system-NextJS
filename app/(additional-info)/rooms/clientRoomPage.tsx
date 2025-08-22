@@ -42,7 +42,7 @@ export const ClientRoomPage: FC<RoomData> = ({initialData}) => {
     const [rooms, setRooms] = useState<RoomWithDetails[]>(initialData.data.rooms);
     const [pagination, setPagination] = useState<Pagination>(initialData.data.pagination);
     const [filters, setFilters] = useState({
-        priceRange: [100, 1000], // Updated to match your actual room prices
+        priceRange: [100, 1000],
         guestCount: "any",
         searchTerm: "",
         sortBy: "price",
